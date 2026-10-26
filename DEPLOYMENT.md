@@ -37,7 +37,11 @@ ALLOWED_ORIGINS=*
 
 ---
 
-## 2. One-Click Deploy to Render.com (Recommended Free Hosting)
+## 2. One-Click Deploy to Render.com (Active Deployment)
+
+> **🎉 Live Production URL:** [https://pharmapulse-owee.onrender.com/#landing](https://pharmapulse-owee.onrender.com/#landing)  
+> **Backend Engine:** Python 3 + FastAPI  
+> **Cloud Database:** Supabase PostgreSQL Managed  
 
 PharmaPulse includes a [`render.yaml`](./render.yaml) blueprint for 1-click zero-config deployment.
 

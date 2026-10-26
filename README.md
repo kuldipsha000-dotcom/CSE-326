@@ -1,6 +1,22 @@
 # PharmaPulse - Pharmacy Management System (CSE 326)
 
-A full-stack, enterprise-grade **Pharmacy Management System** designed to streamline pharmacy operations by digitally managing medicine inventory, sales billing, suppliers, customer records, and prescriptions.
+[![Live Web App](https://img.shields.io/badge/Live%20Demo-Render-46E3B7?style=for-the-badge&logo=render&logoColor=white)](https://pharmapulse-owee.onrender.com/#landing)
+[![Database](https://img.shields.io/badge/Database-Supabase%20Cloud%20Postgres-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com)
+[![FastAPI](https://img.shields.io/badge/Backend-FastAPI%20REST-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
+[![Currency](https://img.shields.io/badge/Currency-%E2%82%B9%20INR%20Native-000000?style=for-the-badge)](#)
+
+> **🚀 Live Production Website:** [https://pharmapulse-owee.onrender.com/#landing](https://pharmapulse-owee.onrender.com/#landing)  
+> **📖 Interactive Swagger API Docs:** [https://pharmapulse-owee.onrender.com/docs](https://pharmapulse-owee.onrender.com/docs)  
+> **📊 System Telemetry & Cloud DB Status:** [https://pharmapulse-owee.onrender.com/api/system/status](https://pharmapulse-owee.onrender.com/api/system/status)
+
+A full-stack, enterprise-grade **Pharmacy Management System** designed to streamline pharmacy operations by digitally managing medicine inventory, sales billing, suppliers, customer records, and prescriptions in Indian Rupees (₹).
+
+---
+
+### 🔑 Instant Live Demo Credentials
+Access the live deployment directly with these pre-seeded Indian healthcare roles:
+- **Administrator**: `admin` / `admin123` (*Dr. Rajesh Sharma*) — Full backoffice, staff management, inventory CRUD, valuation reports
+- **Clinical Pharmacist**: `pharma` / `pharma123` (*Pooja Sharma*) — POS counter billing, GST invoices, digital Rx verification
 
 ---
 
