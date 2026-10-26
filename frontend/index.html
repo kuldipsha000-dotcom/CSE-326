@@ -1,0 +1,2682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PharmaPulse | Pharmacy Management System</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <!-- shadcn/ui Custom Styles -->
+  <link rel="stylesheet" href="css/style.css">
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            border: '#e4e4e7',
+            input: '#e4e4e7',
+            ring: '#18181b',
+            background: '#ffffff',
+            foreground: '#09090b',
+            primary: {
+              DEFAULT: '#18181b',
+              foreground: '#fafafa',
+            },
+            secondary: {
+              DEFAULT: '#f4f4f5',
+              foreground: '#18181b',
+            },
+            muted: {
+              DEFAULT: '#f4f4f5',
+              foreground: '#71717a',
+            },
+            accent: {
+              DEFAULT: '#f4f4f5',
+              foreground: '#18181b',
+            },
+            sidebar: {
+              DEFAULT: '#fafafa',
+              foreground: '#18181b',
+              border: '#e4e4e7',
+            }
+          },
+          borderRadius: {
+            lg: '0.625rem',
+            md: '0.5rem',
+            sm: '0.375rem',
+          },
+          boxShadow: {
+            xs: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-[#fafafa] text-zinc-900 min-h-screen flex flex-col font-sans antialiased selection:bg-zinc-900 selection:text-white">
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container"></div>
+
+  <!-- ==================== LANDING PAGE VIEW (ui.shadcn.com Bento Design) ==================== -->
+  <div id="landing-view" class="flex-1 flex flex-col min-h-screen bg-[#f4f4f5]">
+    
+    <!-- Floating Capsule Pill Navbar (matches user reference image) -->
+    <header class="sticky top-3.5 z-50 px-4 sm:px-6 w-full">
+      <div class="max-w-5xl mx-auto bg-white/95 backdrop-blur-md border border-zinc-200/90 rounded-full py-1.5 px-3 sm:px-4 shadow-sm flex items-center justify-between transition-all duration-200">
+        
+        <!-- Left: Brand Logo & Pill Nav Links -->
+        <div class="flex items-center gap-2 sm:gap-4">
+          <!-- Logo with black rounded square icon like image -->
+          <a href="#landing" onclick="event.preventDefault(); window.navigateToLanding();" class="flex items-center gap-2 pl-1 pr-2 hover:opacity-90 transition">
+            <div class="w-7 h-7 rounded-lg bg-zinc-900 text-white flex items-center justify-center font-bold text-xs shadow-xs">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+            </div>
+            <span class="text-sm font-bold tracking-tight text-zinc-900">PharmaPulse</span>
+          </a>
+
+          <!-- Pill Navigation Items (exact styling of image: rounded-full pill buttons) -->
+          <nav class="hidden md:flex items-center gap-1 text-xs font-medium text-zinc-600">
+            <button onclick="scrollToSection('landing-bento')" data-target="landing-bento" class="landing-nav-pill nav-pill-active px-3.5 py-1.5 rounded-full text-xs transition">
+              Showcase
+            </button>
+            <button onclick="scrollToSection('operations')" data-target="operations" class="landing-nav-pill px-3 py-1.5 rounded-full text-xs text-zinc-600 hover:text-zinc-900 transition">
+              POS Billing
+            </button>
+            <button onclick="scrollToSection('features')" data-target="features" class="landing-nav-pill px-3 py-1.5 rounded-full text-xs text-zinc-600 hover:text-zinc-900 transition">
+              Features
+            </button>
+            <button onclick="scrollToSection('roles-matrix')" data-target="roles-matrix" class="landing-nav-pill px-3 py-1.5 rounded-full text-xs text-zinc-600 hover:text-zinc-900 transition">
+              Roles
+            </button>
+            <button onclick="scrollToSection('cloud-arch')" data-target="cloud-arch" class="landing-nav-pill px-3 py-1.5 rounded-full text-xs text-zinc-600 hover:text-zinc-900 transition">
+              Cloud DB
+            </button>
+          </nav>
+        </div>
+
+        <!-- Right: Status / Workspace / Solid Black Sign In Pill -->
+        <div class="flex items-center gap-1.5 sm:gap-2">
+          
+          <!-- User status if logged in -->
+          <span id="landing-user-status" class="hidden text-xs px-3 py-1.5 rounded-full font-medium bg-zinc-100 text-zinc-800 border border-zinc-200"></span>
+
+          <!-- Launch workspace button (if logged in) -->
+          <button id="landing-launch-app-btn" onclick="window.navigateToApp('dashboard')" class="hidden px-4 py-1.5 sm:py-2 bg-zinc-900 hover:bg-zinc-800 text-zinc-50 text-xs font-semibold rounded-full shadow-xs transition flex items-center gap-1.5 active:scale-[0.97]">
+            <span>Workspace</span>
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+          </button>
+
+          <!-- Solid Black Sign In Pill Button (exact match of "Sign in" in image) -->
+          <button id="landing-signin-btn" onclick="scrollToSection('auth-console')" class="px-5 py-1.5 sm:py-2 bg-zinc-900 hover:bg-zinc-800 text-zinc-50 text-xs font-semibold rounded-full shadow-xs transition active:scale-[0.97]">
+            Sign in
+          </button>
+
+        </div>
+
+      </div>
+    </header>
+
+
+    <!-- Main Landing Container on neutral canvas -->
+    <main class="flex-1 py-10 sm:py-14">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <!-- Header Value Proposition & Subtitle -->
+        <div class="max-w-3xl mb-8">
+          <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-white text-zinc-800 border border-zinc-200/80 shadow-2xs mb-3">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span>CSE 326 Pharmacy Platform</span>
+          </div>
+          <h1 class="text-3xl sm:text-5xl font-bold tracking-tight text-zinc-900 leading-tight">
+            Enterprise Pharmacy OS. Engineered for Precision.
+          </h1>
+          <p class="text-sm sm:text-base text-zinc-600 mt-2.5 leading-relaxed">
+            Real-time counter POS billing in Indian Rupees (₹), automated zero-error expiry radars, distributor procurement inward, and doctor prescription verification.
+          </p>
+
+          <!-- Quick Action Links -->
+          <div class="mt-4 flex flex-wrap items-center gap-2.5">
+            <button onclick="auth.login('admin', 'admin123')" class="px-3.5 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-50 font-medium text-xs rounded-lg shadow-xs transition flex items-center gap-1.5">
+              <span>🚀 1-Click Admin Demo</span>
+              <span class="font-mono text-[10px] text-zinc-400">admin123</span>
+            </button>
+            <button onclick="auth.login('pharma', 'pharma123')" class="px-3.5 py-1.5 bg-white hover:bg-zinc-50 text-zinc-900 font-medium text-xs rounded-lg border border-zinc-200/80 shadow-2xs transition flex items-center gap-1.5">
+              <span>💊 1-Click Pharmacist Demo</span>
+              <span class="font-mono text-[10px] text-zinc-500">pharma123</span>
+            </button>
+            <a href="#auth-console" class="px-3.5 py-1.5 text-zinc-600 hover:text-zinc-900 text-xs font-medium transition flex items-center gap-1">
+              <span>Sign In with Credentials</span>
+              <span>↓</span>
+            </a>
+          </div>
+        </div>
+
+
+        <!-- ==================================================================== -->
+        <!-- THE SIGNATURE ui.shadcn.com BENTO GRID SHOWCASE (Exact Image 1 Style) -->
+        <!-- ==================================================================== -->
+        <div id="landing-bento" class="landing-section grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+          
+          <!-- ==================== COLUMN 1 (LEFT - 3.5 cols) ==================== -->
+          <div class="lg:col-span-4 space-y-5">
+            
+            <!-- Bento Widget 1: Mini Sidebar Navigation (Matches Image 1 Left Card) -->
+            <div class="bg-white rounded-3xl p-6 border border-zinc-200/80 shadow-xs">
+              
+              <!-- Section 1: Overview -->
+              <div class="mb-5">
+                <span class="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider block mb-2 px-2">Clinical Dispensing</span>
+                <div class="space-y-1">
+                  <!-- Active item pill like Analytics in Image 1 -->
+                  <div onclick="auth.loginAndNavigate('pharma', 'pharma123', 'pos')" class="bg-zinc-100 text-zinc-900 font-medium text-xs px-3 py-2 rounded-xl flex items-center justify-between cursor-pointer transition hover:bg-zinc-200/70">
+                    <div class="flex items-center gap-2.5">
+                      <svg class="w-4 h-4 text-zinc-900" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                      <span>POS Counter Billing</span>
+                    </div>
+                    <span class="font-mono text-[9px] bg-zinc-200 text-zinc-700 px-1 py-0.2 rounded">F2</span>
+                  </div>
+
+                  <div onclick="auth.loginAndNavigate('admin', 'admin123', 'inventory')" class="text-zinc-600 hover:text-zinc-900 hover:bg-zinc-50 font-medium text-xs px-3 py-2 rounded-xl flex items-center gap-2.5 cursor-pointer transition">
+                    <svg class="w-4 h-4 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                    <span>Medicine Inventory</span>
+                    <span class="ml-auto text-[10px] text-zinc-400 font-mono">23 SKUs</span>
+                  </div>
+
+                  <div onclick="auth.loginAndNavigate('pharma', 'pharma123', 'prescriptions')" class="text-zinc-600 hover:text-zinc-900 hover:bg-zinc-50 font-medium text-xs px-3 py-2 rounded-xl flex items-center gap-2.5 cursor-pointer transition">
+                    <svg class="w-4 h-4 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    <span>Prescription (Rx) Records</span>
+                  </div>
+
+                  <div onclick="auth.loginAndNavigate('admin', 'admin123', 'alerts')" class="text-zinc-600 hover:text-zinc-900 hover:bg-zinc-50 font-medium text-xs px-3 py-2 rounded-xl flex items-center gap-2.5 cursor-pointer transition">
+                    <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                    <span>Safety Alerts Radar</span>
+                    <span class="ml-auto text-[9px] bg-red-100 text-red-700 font-bold px-1.5 py-0.2 rounded-full">3 Alert</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Section 2: Account / Administration -->
+              <div>
+                <span class="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider block mb-2 px-2">Pharmacy Backoffice</span>
+                <div class="space-y-1">
+                  <div onclick="auth.loginAndNavigate('admin', 'admin123', 'suppliers')" class="text-zinc-600 hover:text-zinc-900 hover:bg-zinc-50 font-medium text-xs px-3 py-2 rounded-xl flex items-center gap-2.5 cursor-pointer transition">
+                    <svg class="w-4 h-4 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                    <span>Suppliers & Purchases</span>
+                  </div>
+
+                  <!-- Active item pill like Billing in Image 1 -->
+                  <div onclick="auth.loginAndNavigate('admin', 'admin123', 'reports')" class="bg-zinc-100 text-zinc-900 font-medium text-xs px-3 py-2 rounded-xl flex items-center justify-between cursor-pointer transition hover:bg-zinc-200/70">
+                    <div class="flex items-center gap-2.5">
+                      <svg class="w-4 h-4 text-zinc-900" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                      <span>Financial Valuation (₹)</span>
+                    </div>
+                    <span class="text-[10px] text-emerald-600 font-semibold font-mono">+38.4%</span>
+                  </div>
+
+                  <div onclick="auth.loginAndNavigate('admin', 'admin123', 'users')" class="text-zinc-600 hover:text-zinc-900 hover:bg-zinc-50 font-medium text-xs px-3 py-2 rounded-xl flex items-center gap-2.5 cursor-pointer transition">
+                    <svg class="w-4 h-4 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                    <span>Staff & Role Access</span>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Bento Widget 2: Expiry Safety Radar (Matches 'Savings Targets' in Image 1) -->
+            <div class="bg-white rounded-3xl p-6 border border-zinc-200/80 shadow-xs">
+              <h3 class="text-base font-bold text-zinc-900 tracking-tight">Clinical Safety Radar</h3>
+              <p class="text-xs text-zinc-500 mt-1 leading-relaxed">
+                Active batch surveillance across 2026 formulations. Automatically hard-blocks expired drug counter dispensing.
+              </p>
+
+              <!-- Milestone 1 (Like Retirement in Image 1) -->
+              <div class="mt-5 pt-4 border-t border-zinc-100">
+                <span class="text-[10px] font-semibold uppercase tracking-wider text-zinc-400 block">Zero-Error Compliance</span>
+                <div class="text-3xl font-bold tracking-tight text-zinc-900 mt-1 tabular-nums">0 Expired Sales</div>
+                
+                <!-- Solid black progress bar like Image 1 -->
+                <div class="w-full bg-zinc-100 h-2.5 rounded-full overflow-hidden my-2.5">
+                  <div class="bg-zinc-900 h-full rounded-full" style="width: 100%;"></div>
+                </div>
+                
+                <div class="flex items-center justify-between text-xs text-zinc-500 font-medium">
+                  <span class="text-emerald-600 font-semibold">100% compliant</span>
+                  <span class="tabular-nums font-mono text-zinc-600">23/23 Formulations Safe</span>
+                </div>
+              </div>
+
+              <!-- Milestone 2 (Like Real Estate in Image 1) -->
+              <div class="mt-4 pt-3 border-t border-zinc-100">
+                <div class="flex items-center justify-between">
+                  <span class="text-[10px] font-semibold uppercase tracking-wider text-zinc-400">FIFO Dispensing (30-60 Days)</span>
+                  <span class="text-[10px] bg-amber-50 text-amber-700 font-medium px-1.5 py-0.2 rounded border border-amber-200">2 Items Soon</span>
+                </div>
+                <div class="text-xl font-bold tracking-tight text-zinc-800 mt-1 tabular-nums">Priority Shelf Dispense</div>
+                <div class="mt-2 text-[11px] text-zinc-600 space-y-1">
+                  <div class="flex justify-between"><span>Amoxicillin 500mg (Batch B402)</span><span class="font-mono text-amber-600 font-medium">18d left</span></div>
+                  <div class="flex justify-between"><span>Montair-LC (Batch M109)</span><span class="font-mono text-blue-600 font-medium">34d left</span></div>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <!-- ==================== COLUMN 2 (CENTER - 4.5 cols) ==================== -->
+          <div class="lg:col-span-5 space-y-5">
+            
+            <!-- Bento Widget 3: Financial Settlement (Matches '$1,211.29' Card in Image 1) -->
+            <div id="operations" class="landing-section bg-white rounded-3xl p-7 border border-zinc-200/80 shadow-xs">
+              
+              <!-- Massive balance typography -->
+              <div class="text-4xl sm:text-5xl font-extrabold tracking-tight text-zinc-900 tabular-nums">
+                ₹1,42,850.00
+              </div>
+
+              <!-- Pending / Active Setup Badge like Image 1 -->
+              <div class="mt-2.5">
+                <span class="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200/80">
+                  <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                  <span>Active Shift • Counter Billing (F2)</span>
+                </span>
+              </div>
+
+              <!-- Breakdown Table like Image 1 -->
+              <div class="mt-6 pt-5 border-t border-zinc-100 space-y-2.5 text-xs">
+                <div class="flex items-center justify-between text-zinc-500">
+                  <span>Gross Sales Recorded</span>
+                  <span class="font-semibold text-zinc-900 font-mono tabular-nums">₹1,56,400.00</span>
+                </div>
+                <div class="flex items-center justify-between text-zinc-500">
+                  <span>Discount & Institutional Subsidy</span>
+                  <span class="font-semibold text-zinc-900 font-mono tabular-nums">−₹13,550.00</span>
+                </div>
+                <div class="pt-3 border-t border-zinc-200 flex items-center justify-between">
+                  <span class="font-medium text-zinc-900">Total Net Settled</span>
+                  <span class="text-base font-bold text-zinc-900 font-mono tabular-nums">₹1,42,850.00 INR</span>
+                </div>
+              </div>
+
+              <!-- Footnote Text like Image 1 -->
+              <p class="text-[11px] text-zinc-400 mt-5 leading-relaxed">
+                All counter sales generate official GST-compliant tax invoices. Automatic payment reconciliation supports Cash, UPI QR (PhonePe / GPay), and Credit/Debit Cards.
+              </p>
+
+              <!-- Action button -->
+              <div class="mt-5 pt-4 border-t border-zinc-100 flex items-center gap-2">
+                <button onclick="auth.loginAndNavigate('pharma', 'pharma123', 'pos')" class="flex-1 py-2.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-50 font-medium rounded-xl text-xs shadow-xs transition flex items-center justify-center gap-2">
+                  <span>Launch POS Counter (F2)</span>
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                </button>
+              </div>
+
+            </div>
+
+            <!-- Bento Widget 4: Category Stock Health (Matches 'Q2 Dividend Income' in Image 1) -->
+            <div class="bg-white rounded-3xl p-6 border border-zinc-200/80 shadow-xs">
+              <div class="flex items-start justify-between">
+                <div>
+                  <h3 class="text-base font-bold text-zinc-900 tracking-tight">Therapeutic Category Health</h3>
+                  <p class="text-xs text-zinc-500 mt-0.5">Stock volume and margin distribution across inventory classes.</p>
+                </div>
+                <!-- Close X button like Image 1 -->
+                <button class="text-zinc-400 hover:text-zinc-700 p-1 text-sm font-semibold">✕</button>
+              </div>
+
+              <div class="mt-5 space-y-4">
+                
+                <!-- Category 1 (Like Vanguard in Image 1) -->
+                <div class="flex items-center justify-between pt-1">
+                  <div>
+                    <div class="text-xs font-semibold text-zinc-900">Antibiotics & Antimicrobial</div>
+                    <div class="text-[11px] text-zinc-400">6 Formulations • 450 Units</div>
+                  </div>
+                  <!-- Mini vertical bar chart pillars like Image 1 -->
+                  <div class="flex items-end gap-1 h-7">
+                    <span class="w-2 bg-zinc-300 rounded-xs h-3"></span>
+                    <span class="w-2 bg-zinc-500 rounded-xs h-5"></span>
+                    <span class="w-2 bg-zinc-900 rounded-xs h-7"></span>
+                    <span class="w-2 bg-zinc-700 rounded-xs h-4"></span>
+                  </div>
+                </div>
+
+                <!-- Category 2 (Like S&P 500 in Image 1) -->
+                <div class="flex items-center justify-between pt-3 border-t border-zinc-100">
+                  <div>
+                    <div class="text-xs font-semibold text-zinc-900">Analgesics & Antipyretics</div>
+                    <div class="text-[11px] text-zinc-400">8 Formulations • 820 Units</div>
+                  </div>
+                  <!-- Mini vertical bar chart pillars -->
+                  <div class="flex items-end gap-1 h-7">
+                    <span class="w-2 bg-zinc-300 rounded-xs h-2"></span>
+                    <span class="w-2 bg-zinc-400 rounded-xs h-4"></span>
+                    <span class="w-2 bg-zinc-600 rounded-xs h-5"></span>
+                    <span class="w-2 bg-zinc-900 rounded-xs h-7"></span>
+                  </div>
+                </div>
+
+                <!-- Category 3 -->
+                <div class="flex items-center justify-between pt-3 border-t border-zinc-100">
+                  <div>
+                    <div class="text-xs font-semibold text-zinc-900">Respiratory & Gastrointestinal</div>
+                    <div class="text-[11px] text-zinc-400">5 Formulations • 310 Units</div>
+                  </div>
+                  <div class="flex items-end gap-1 h-7">
+                    <span class="w-2 bg-zinc-300 rounded-xs h-3"></span>
+                    <span class="w-2 bg-zinc-700 rounded-xs h-6"></span>
+                    <span class="w-2 bg-zinc-900 rounded-xs h-7"></span>
+                    <span class="w-2 bg-zinc-400 rounded-xs h-4"></span>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+          </div>
+
+
+          <!-- ==================== COLUMN 3 (RIGHT - 3.5 cols) ==================== -->
+          <div class="lg:col-span-3 space-y-5">
+            
+            <!-- Bento Widget 5: Prescription Rx Card (Matches 'Morning, shadcn!' Chat in Image 1) -->
+            <div class="bg-white rounded-3xl p-6 border border-zinc-200/80 shadow-xs flex flex-col justify-between">
+              <div>
+                <!-- Icon badge like the circular badge in Image 1 -->
+                <div class="w-9 h-9 rounded-2xl bg-zinc-100 flex items-center justify-center text-zinc-900 mb-4 shadow-2xs">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                </div>
+                <h3 class="text-base font-bold text-zinc-900 tracking-tight">Prescription Review</h3>
+                <p class="text-xs text-zinc-500 mt-1 leading-relaxed">Schedule H & H1 verified medical orders ready for patient counter dispensing.</p>
+
+                <!-- Chat / Prescription Message Bubble like Image 1 -->
+                <div class="mt-4 p-3.5 bg-zinc-50 rounded-2xl border border-zinc-100 text-xs space-y-1.5">
+                  <div class="font-semibold text-zinc-900 flex items-center justify-between">
+                    <span>Rx #2026-DEL-041</span>
+                    <span class="text-[9px] bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.2 rounded">VERIFIED</span>
+                  </div>
+                  <div class="text-[11px] text-zinc-500">Dr. Rajesh Kumar (MCI-DEL-4821)</div>
+                  <div class="text-[11px] text-zinc-800 font-medium pt-1 border-t border-zinc-200/60">
+                    Patient: Priya Sharma (Penicillin Allergy ⚠️)
+                  </div>
+                  <div class="text-[10px] text-zinc-500 italic">Dolo 650mg TDS, Pan-D 40mg OD</div>
+                </div>
+              </div>
+
+              <!-- Input bar with + and send button like Image 1 -->
+              <div class="mt-4 pt-3 border-t border-zinc-100 flex items-center gap-2">
+                <button onclick="auth.loginAndNavigate('pharma', 'pharma123', 'prescriptions')" class="w-8 h-8 rounded-full border border-zinc-200 flex items-center justify-center text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 transition" title="Upload Rx Document">
+                  +
+                </button>
+                <div onclick="auth.loginAndNavigate('pharma', 'pharma123', 'prescriptions')" class="flex-1 text-[11px] text-zinc-400 px-2 cursor-pointer">
+                  Approve order...
+                </div>
+                <button onclick="auth.loginAndNavigate('pharma', 'pharma123', 'prescriptions')" class="w-8 h-8 rounded-full bg-zinc-900 text-white flex items-center justify-center hover:bg-zinc-800 transition shadow-xs" title="Dispense Rx">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                </button>
+              </div>
+
+            </div>
+
+            <!-- Bento Widget 6: Settings & Payments Card (Matches Settings in Image 1) -->
+            <div class="bg-white rounded-3xl p-6 border border-zinc-200/80 shadow-xs">
+              <!-- Breadcrumb like Image 1 -->
+              <div class="flex items-center gap-1.5 text-[11px] text-zinc-400 font-medium mb-3">
+                <span>Operations</span>
+                <span>›</span>
+                <span>Security</span>
+                <span>›</span>
+                <span class="text-zinc-700">Database</span>
+              </div>
+
+              <div class="space-y-3">
+                <!-- Row 1 (Like Change transfer limit in Image 1) -->
+                <div onclick="auth.showSystemModal()" class="flex items-center justify-between p-2.5 rounded-xl hover:bg-zinc-50 cursor-pointer transition">
+                  <div class="flex items-center gap-2.5">
+                    <div class="w-7 h-7 rounded-lg bg-zinc-100 flex items-center justify-center text-zinc-700">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"/></svg>
+                    </div>
+                    <div>
+                      <div class="text-xs font-semibold text-zinc-900">Database Engine</div>
+                      <div class="text-[10px] text-zinc-500">SQLite & Supabase Dual-Engine</div>
+                    </div>
+                  </div>
+                  <span class="text-zinc-400 font-mono text-xs">›</span>
+                </div>
+
+                <!-- Row 2 -->
+                <div onclick="auth.showChangePasswordModal()" class="flex items-center justify-between p-2.5 rounded-xl hover:bg-zinc-50 cursor-pointer transition border-t border-zinc-100">
+                  <div class="flex items-center gap-2.5">
+                    <div class="w-7 h-7 rounded-lg bg-zinc-100 flex items-center justify-center text-zinc-700">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                    </div>
+                    <div>
+                      <div class="text-xs font-semibold text-zinc-900">JWT Token Security</div>
+                      <div class="text-[10px] text-zinc-500">HS256 24-hour expiration</div>
+                    </div>
+                  </div>
+                  <span class="text-zinc-400 font-mono text-xs">›</span>
+                </div>
+
+                <!-- Row 3 -->
+                <div class="flex items-center justify-between p-2.5 rounded-xl hover:bg-zinc-50 transition border-t border-zinc-100">
+                  <div class="flex items-center gap-2.5">
+                    <div class="w-7 h-7 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-700 font-bold text-xs">
+                      ₹
+                    </div>
+                    <div>
+                      <div class="text-xs font-semibold text-zinc-900">Currency Standard</div>
+                      <div class="text-[10px] text-zinc-500">Indian Rupee (₹ / INR Native)</div>
+                    </div>
+                  </div>
+                  <span class="text-emerald-600 text-xs font-bold font-mono">INR</span>
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+        <!-- ==================== END BENTO GRID SHOWCASE ==================== -->
+
+
+
+        <!-- ==================================================================== -->
+        <!-- DEDICATED AUTHENTICATION & DEMO ACCESS CONSOLE -->
+        <!-- ==================================================================== -->
+        <div id="auth-console" class="landing-section mt-14 max-w-4xl mx-auto bg-white rounded-3xl border border-zinc-200/80 shadow-md overflow-hidden">
+          
+          <div class="p-6 border-b border-zinc-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-zinc-50/50">
+            <div>
+              <span class="text-[10px] font-semibold uppercase tracking-wider text-zinc-400">Authentication Portal</span>
+              <h3 class="text-xl font-bold tracking-tight text-zinc-900">Instant Access & Account Login</h3>
+              <p class="text-xs text-zinc-500 mt-0.5">Choose a 1-click live demo role or log in with your credentials.</p>
+            </div>
+
+            <!-- Tab Switcher Bar -->
+            <div class="p-1.5 bg-white border border-zinc-200/80 rounded-2xl flex items-center gap-1 shadow-2xs">
+              <button id="landing-tab-demo" onclick="auth.switchLandingAuthTab('demo')" class="px-3 py-1.5 rounded-xl text-xs transition bg-zinc-900 text-zinc-50 font-semibold shadow-xs flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                <span>1-Click Demos</span>
+              </button>
+              <button id="landing-tab-login" onclick="auth.switchLandingAuthTab('login')" class="px-3 py-1.5 rounded-xl text-xs transition text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 font-medium flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/></svg>
+                <span>Sign In</span>
+              </button>
+              <button id="landing-tab-register" onclick="auth.switchLandingAuthTab('register')" class="px-3 py-1.5 rounded-xl text-xs transition text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 font-medium flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
+                <span>Register</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Tab Content 1: 1-Click Demo Profiles -->
+          <div id="landing-content-demo" class="p-6 sm:p-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              
+              <!-- Admin Demo Card -->
+              <div class="p-5 rounded-2xl border border-zinc-200 bg-zinc-50/40 hover:bg-zinc-50 transition flex flex-col justify-between">
+                <div>
+                  <div class="flex items-center justify-between mb-2">
+                    <span class="text-[10px] font-semibold uppercase tracking-wider text-zinc-400">System Administrator</span>
+                    <span class="text-[10px] px-2 py-0.5 rounded font-mono font-bold bg-zinc-900 text-zinc-50">ADMIN</span>
+                  </div>
+                  <h4 class="text-sm font-bold text-zinc-900">Dr. Rajesh Sharma</h4>
+                  <p class="text-xs text-zinc-500 mt-0.5 font-mono">admin / admin123</p>
+                  <ul class="mt-3.5 space-y-1.5 text-xs text-zinc-600">
+                    <li class="flex items-center gap-2"><span class="text-emerald-600 font-bold">✓</span> Full Medicine Inventory CRUD & Export</li>
+                    <li class="flex items-center gap-2"><span class="text-emerald-600 font-bold">✓</span> Staff Permissions & Role Elevation</li>
+                    <li class="flex items-center gap-2"><span class="text-emerald-600 font-bold">✓</span> Financial Valuation & Margin Reports (₹)</li>
+                    <li class="flex items-center gap-2"><span class="text-emerald-600 font-bold">✓</span> Sales Audit, Invoices & Voiding</li>
+                  </ul>
+                </div>
+                <button onclick="auth.login('admin', 'admin123')" class="mt-5 w-full py-2.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-50 font-medium rounded-xl text-xs shadow-xs transition flex items-center justify-center gap-1.5">
+                  <span>Launch Admin Session</span>
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                </button>
+              </div>
+
+              <!-- Pharmacist Demo Card -->
+              <div class="p-5 rounded-2xl border border-zinc-200 bg-zinc-50/40 hover:bg-zinc-50 transition flex flex-col justify-between">
+                <div>
+                  <div class="flex items-center justify-between mb-2">
+                    <span class="text-[10px] font-semibold uppercase tracking-wider text-zinc-400">Clinical Pharmacist</span>
+                    <span class="text-[10px] px-2 py-0.5 rounded font-mono font-bold bg-zinc-200 text-zinc-800">STAFF</span>
+                  </div>
+                  <h4 class="text-sm font-bold text-zinc-900">Pooja Sharma</h4>
+                  <p class="text-xs text-zinc-500 mt-0.5 font-mono">pharma / pharma123</p>
+                  <ul class="mt-3.5 space-y-1.5 text-xs text-zinc-600">
+                    <li class="flex items-center gap-2"><span class="text-emerald-600 font-bold">✓</span> High-speed POS Counter Billing in ₹ INR</li>
+                    <li class="flex items-center gap-2"><span class="text-emerald-600 font-bold">✓</span> Printable GST-Compliant Tax Receipts</li>
+                    <li class="flex items-center gap-2"><span class="text-emerald-600 font-bold">✓</span> Prescription (Rx) Upload & Verification</li>
+                    <li class="flex items-center gap-2"><span class="text-emerald-600 font-bold">✓</span> Customer Medical Allergy Warnings</li>
+                  </ul>
+                </div>
+                <button onclick="auth.login('pharma', 'pharma123')" class="mt-5 w-full py-2.5 bg-white hover:bg-zinc-100 text-zinc-900 border border-zinc-200 font-medium rounded-xl text-xs shadow-xs transition flex items-center justify-center gap-1.5">
+                  <span>Launch Pharmacist Session</span>
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                </button>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Tab Content 2: Sign In Form -->
+          <div id="landing-content-login" class="p-6 sm:p-8 hidden">
+            <form onsubmit="event.preventDefault(); auth.login(document.getElementById('landing-login-user').value, document.getElementById('landing-login-pass').value);" class="max-w-md mx-auto space-y-3.5">
+              <div>
+                <label class="block text-xs font-medium text-zinc-700 mb-1">Username or Email</label>
+                <input id="landing-login-user" type="text" placeholder="admin or pharma" required class="w-full px-3.5 py-2 text-xs bg-white border border-zinc-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-zinc-950 font-medium">
+              </div>
+              <div>
+                <div class="flex items-center justify-between mb-1">
+                  <label class="block text-xs font-medium text-zinc-700">Password</label>
+                  <span class="text-[11px] text-zinc-400 font-mono">admin123 / pharma123</span>
+                </div>
+                <input id="landing-login-pass" type="password" placeholder="••••••••" required class="w-full px-3.5 py-2 text-xs bg-white border border-zinc-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-zinc-950 font-medium">
+              </div>
+              <div class="pt-2 flex items-center gap-2">
+                <button type="submit" class="flex-1 py-2.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-50 font-medium rounded-xl text-xs shadow-xs transition flex items-center justify-center gap-1.5">
+                  <span>Sign In to Workspace</span>
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                </button>
+                <button type="button" onclick="document.getElementById('landing-login-user').value='admin'; document.getElementById('landing-login-pass').value='admin123';" class="px-3.5 py-2.5 border border-zinc-200 text-zinc-600 hover:text-zinc-900 hover:bg-zinc-50 rounded-xl text-xs font-medium transition" title="Fill Admin Credentials">
+                  Auto-fill
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Tab Content 3: Sign Up Form -->
+          <div id="landing-content-register" class="p-6 sm:p-8 hidden">
+            <form onsubmit="event.preventDefault(); auth.register({
+              full_name: document.getElementById('landing-reg-name').value,
+              username: document.getElementById('landing-reg-username').value,
+              email: document.getElementById('landing-reg-email').value,
+              phone: document.getElementById('landing-reg-phone').value,
+              role: document.getElementById('landing-reg-role').value,
+              password: document.getElementById('landing-reg-pass').value
+            });" class="max-w-xl mx-auto space-y-3">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-[11px] font-medium text-zinc-700 mb-1">Full Name *</label>
+                  <input id="landing-reg-name" type="text" placeholder="Dr. Rajesh Verma" required class="w-full px-3 py-1.5 text-xs bg-white border border-zinc-200 rounded-xl focus:ring-1 focus:ring-zinc-950 font-medium">
+                </div>
+                <div>
+                  <label class="block text-[11px] font-medium text-zinc-700 mb-1">Username *</label>
+                  <input id="landing-reg-username" type="text" placeholder="rverma" required class="w-full px-3 py-1.5 text-xs bg-white border border-zinc-200 rounded-xl focus:ring-1 focus:ring-zinc-950 font-medium">
+                </div>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-[11px] font-medium text-zinc-700 mb-1">Email Address *</label>
+                  <input id="landing-reg-email" type="email" placeholder="rverma@pharmacy.in" required class="w-full px-3 py-1.5 text-xs bg-white border border-zinc-200 rounded-xl focus:ring-1 focus:ring-zinc-950 font-medium">
+                </div>
+                <div>
+                  <label class="block text-[11px] font-medium text-zinc-700 mb-1">Phone Number</label>
+                  <input id="landing-reg-phone" type="tel" placeholder="+91 98765 43210" class="w-full px-3 py-1.5 text-xs bg-white border border-zinc-200 rounded-xl focus:ring-1 focus:ring-zinc-950 font-medium">
+                </div>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-[11px] font-medium text-zinc-700 mb-1">Assigned Role</label>
+                  <select id="landing-reg-role" class="w-full px-2.5 py-1.5 text-xs bg-white border border-zinc-200 rounded-xl focus:ring-1 focus:ring-zinc-950 font-medium">
+                    <option value="pharmacist">Pharmacist</option>
+                    <option value="cashier">Cashier / Staff</option>
+                    <option value="admin">Administrator</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-[11px] font-medium text-zinc-700 mb-1">Password * (Min 6 chars)</label>
+                  <input id="landing-reg-pass" type="password" minlength="6" placeholder="Create password" required class="w-full px-3 py-1.5 text-xs bg-white border border-zinc-200 rounded-xl focus:ring-1 focus:ring-zinc-950 font-medium">
+                </div>
+              </div>
+              <div class="pt-2">
+                <button type="submit" class="w-full py-2.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-50 font-medium rounded-xl text-xs shadow-xs transition flex items-center justify-center gap-1.5">
+                  <span>Register & Open Workspace</span>
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                </button>
+              </div>
+            </form>
+          </div>
+
+        </div>
+
+
+
+        <!-- ==================================================================== -->
+        <!-- COMPREHENSIVE FEATURES GRID (Exact ui.shadcn.com Card Styling) -->
+        <!-- ==================================================================== -->
+        <div id="features" class="landing-section mt-20 pt-10 border-t border-zinc-200/80">
+          
+          <div class="text-center max-w-2xl mx-auto mb-12">
+            <span class="text-[11px] font-semibold uppercase tracking-wider text-zinc-400">Platform Capabilities</span>
+            <h2 class="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-900 mt-1">
+              End-to-End Clinical & Commercial Pharmacy Modules
+            </h2>
+            <p class="text-xs sm:text-sm text-zinc-600 mt-2">
+              Every feature designed for high counter speed, regulatory compliance, and inventory accuracy.
+            </p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+            
+            <!-- Card 1 -->
+            <div class="bg-white rounded-3xl p-6 border border-zinc-200/80 shadow-xs flex flex-col justify-between">
+              <div>
+                <div class="w-9 h-9 rounded-2xl bg-zinc-100 text-zinc-900 flex items-center justify-center mb-4">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                </div>
+                <h3 class="text-sm font-bold text-zinc-900">Inventory & Batch Tracking</h3>
+                <p class="text-xs text-zinc-500 mt-2 leading-relaxed">
+                  Brand names, generic salts, strength (mg/ml), storage racks, batch numbers, barcodes, and automated stock deductions.
+                </p>
+              </div>
+              <div class="mt-4 pt-3 border-t border-zinc-100 flex flex-wrap gap-1">
+                <span class="text-[10px] font-medium bg-zinc-50 text-zinc-600 border border-zinc-200 px-2 py-0.5 rounded-md">Rack Shelf</span>
+                <span class="text-[10px] font-medium bg-zinc-50 text-zinc-600 border border-zinc-200 px-2 py-0.5 rounded-md">CSV Export</span>
+              </div>
+            </div>
+
+            <!-- Card 2 -->
+            <div class="bg-white rounded-3xl p-6 border border-zinc-200/80 shadow-xs flex flex-col justify-between">
+              <div>
+                <div class="w-9 h-9 rounded-2xl bg-zinc-100 text-zinc-900 flex items-center justify-center mb-4">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                </div>
+                <h3 class="text-sm font-bold text-zinc-900">POS Counter Billing (₹ INR)</h3>
+                <p class="text-xs text-zinc-500 mt-2 leading-relaxed">
+                  Fast barcode & keyboard search (F2), multi-mode payment (Cash, UPI QR, Cards, Insurance), and printable GST Tax Invoices.
+                </p>
+              </div>
+              <div class="mt-4 pt-3 border-t border-zinc-100 flex flex-wrap gap-1">
+                <span class="text-[10px] font-medium bg-zinc-50 text-zinc-600 border border-zinc-200 px-2 py-0.5 rounded-md">GST Tax Invoice</span>
+                <span class="text-[10px] font-medium bg-zinc-50 text-zinc-600 border border-zinc-200 px-2 py-0.5 rounded-md">UPI QR Code</span>
+              </div>
+            </div>
+
+            <!-- Card 3 -->
+            <div class="bg-white rounded-3xl p-6 border border-zinc-200/80 shadow-xs flex flex-col justify-between">
+              <div>
+                <div class="w-9 h-9 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center mb-4">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                </div>
+                <h3 class="text-sm font-bold text-zinc-900">Safety & Expiry Radar</h3>
+                <p class="text-xs text-zinc-500 mt-2 leading-relaxed">
+                  Prevents dispensing expired medicines at counter. 30/60-day early warning radar for priority FIFO dispensing, plus low-stock triggers.
+                </p>
+              </div>
+              <div class="mt-4 pt-3 border-t border-zinc-100 flex flex-wrap gap-1">
+                <span class="text-[10px] font-medium bg-red-50 text-red-700 border border-red-200 px-2 py-0.5 rounded-md">Zero Expired</span>
+                <span class="text-[10px] font-medium bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-md">FIFO Radar</span>
+              </div>
+            </div>
+
+            <!-- Card 4 -->
+            <div class="bg-white rounded-3xl p-6 border border-zinc-200/80 shadow-xs flex flex-col justify-between">
+              <div>
+                <div class="w-9 h-9 rounded-2xl bg-zinc-100 text-zinc-900 flex items-center justify-center mb-4">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                </div>
+                <h3 class="text-sm font-bold text-zinc-900">Prescription (Rx) Records</h3>
+                <p class="text-xs text-zinc-500 mt-2 leading-relaxed">
+                  Verify doctor MCI registration numbers, link customer files, attach Rx scans/photos (PDF/JPEG), and enforce Schedule H rules.
+                </p>
+              </div>
+              <div class="mt-4 pt-3 border-t border-zinc-100 flex flex-wrap gap-1">
+                <span class="text-[10px] font-medium bg-zinc-50 text-zinc-600 border border-zinc-200 px-2 py-0.5 rounded-md">MCI Validation</span>
+                <span class="text-[10px] font-medium bg-zinc-50 text-zinc-600 border border-zinc-200 px-2 py-0.5 rounded-md">Digital Rx Scan</span>
+              </div>
+            </div>
+
+            <!-- Card 5 -->
+            <div class="bg-white rounded-3xl p-6 border border-zinc-200/80 shadow-xs flex flex-col justify-between">
+              <div>
+                <div class="w-9 h-9 rounded-2xl bg-zinc-100 text-zinc-900 flex items-center justify-center mb-4">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                </div>
+                <h3 class="text-sm font-bold text-zinc-900">Suppliers & Stock Inward</h3>
+                <p class="text-xs text-zinc-500 mt-2 leading-relaxed">
+                  Distributor directory (Cipla, Sun Pharma, Mankind, Abbott), multi-line Purchase Orders, and automated wholesale stock inward.
+                </p>
+              </div>
+              <div class="mt-4 pt-3 border-t border-zinc-100 flex flex-wrap gap-1">
+                <span class="text-[10px] font-medium bg-zinc-50 text-zinc-600 border border-zinc-200 px-2 py-0.5 rounded-md">Distributor POs</span>
+                <span class="text-[10px] font-medium bg-zinc-50 text-zinc-600 border border-zinc-200 px-2 py-0.5 rounded-md">Stock Inward</span>
+              </div>
+            </div>
+
+            <!-- Card 6 -->
+            <div class="bg-white rounded-3xl p-6 border border-zinc-200/80 shadow-xs flex flex-col justify-between">
+              <div>
+                <div class="w-9 h-9 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center mb-4">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                </div>
+                <h3 class="text-sm font-bold text-zinc-900">Patients & Allergy Guard</h3>
+                <p class="text-xs text-zinc-500 mt-2 leading-relaxed">
+                  Patient directory with chronic condition notes and real-time medical allergy warning banners at checkout (e.g. Penicillin alert).
+                </p>
+              </div>
+              <div class="mt-4 pt-3 border-t border-zinc-100 flex flex-wrap gap-1">
+                <span class="text-[10px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-md">Allergy Alerts</span>
+                <span class="text-[10px] font-medium bg-zinc-50 text-zinc-600 border border-zinc-200 px-2 py-0.5 rounded-md">Patient Profiles</span>
+              </div>
+            </div>
+
+            <!-- Card 7 -->
+            <div class="bg-white rounded-3xl p-6 border border-zinc-200/80 shadow-xs flex flex-col justify-between">
+              <div>
+                <div class="w-9 h-9 rounded-2xl bg-zinc-100 text-zinc-900 flex items-center justify-center mb-4">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                </div>
+                <h3 class="text-sm font-bold text-zinc-900">Valuation & Gross Margins</h3>
+                <p class="text-xs text-zinc-500 mt-2 leading-relaxed">
+                  Chart.js 7-day revenue trendlines, category doughnut charts, wholesale valuation, retail valuation, and gross margin calculations.
+                </p>
+              </div>
+              <div class="mt-4 pt-3 border-t border-zinc-100 flex flex-wrap gap-1">
+                <span class="text-[10px] font-medium bg-zinc-50 text-zinc-600 border border-zinc-200 px-2 py-0.5 rounded-md">Wholesale vs Retail</span>
+                <span class="text-[10px] font-medium bg-zinc-50 text-zinc-600 border border-zinc-200 px-2 py-0.5 rounded-md">Margins</span>
+              </div>
+            </div>
+
+            <!-- Card 8 -->
+            <div class="bg-white rounded-3xl p-6 border border-zinc-200/80 shadow-xs flex flex-col justify-between">
+              <div>
+                <div class="w-9 h-9 rounded-2xl bg-zinc-900 text-white flex items-center justify-center mb-4">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"/></svg>
+                </div>
+                <h3 class="text-sm font-bold text-zinc-900">Supabase & Cloud Ready</h3>
+                <p class="text-xs text-zinc-500 mt-2 leading-relaxed">
+                  Connect your Supabase Cloud PostgreSQL with one environment variable. Auto-migrates schema on startup. 1-click Render and Docker configs.
+                </p>
+              </div>
+              <div class="mt-4 pt-3 border-t border-zinc-100 flex flex-wrap gap-1">
+                <span class="text-[10px] font-medium bg-zinc-900 text-zinc-50 px-2 py-0.5 rounded-md">Supabase Ready</span>
+                <span class="text-[10px] font-medium bg-zinc-50 text-zinc-600 border border-zinc-200 px-2 py-0.5 rounded-md">Dockerized</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+
+
+        <!-- ==================================================================== -->
+        <!-- RBAC ROLES MATRIX SECTION -->
+        <!-- ==================================================================== -->
+        <div id="roles-matrix" class="landing-section mt-20 pt-10 border-t border-zinc-200/80 max-w-4xl mx-auto">
+          <div class="text-center mb-8">
+            <span class="text-[11px] font-semibold uppercase tracking-wider text-zinc-400">Security Architecture</span>
+            <h2 class="text-2xl font-bold tracking-tight text-zinc-900 mt-1">Role-Based Access Control (RBAC) Matrix</h2>
+            <p class="text-xs text-zinc-500 mt-1">Enforced across all backend routers with signed JWT bearer tokens.</p>
+          </div>
+
+          <div class="bg-white rounded-3xl border border-zinc-200/80 shadow-xs overflow-hidden">
+            <table class="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr class="bg-zinc-50 border-b border-zinc-200/80 text-[11px] font-semibold text-zinc-600 uppercase tracking-wider">
+                  <th class="p-4">Operational Capability</th>
+                  <th class="p-4 text-center">Administrator</th>
+                  <th class="p-4 text-center">Pharmacist</th>
+                  <th class="p-4 text-center">Cashier</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-zinc-100">
+                <tr class="hover:bg-zinc-50/50">
+                  <td class="p-4 font-medium text-zinc-900">POS Counter Billing & GST Receipt Printing</td>
+                  <td class="p-4 text-center text-emerald-600 font-bold">✓ Full</td>
+                  <td class="p-4 text-center text-emerald-600 font-bold">✓ Full</td>
+                  <td class="p-4 text-center text-emerald-600 font-bold">✓ Full</td>
+                </tr>
+                <tr class="hover:bg-zinc-50/50">
+                  <td class="p-4 font-medium text-zinc-900">Medicine Master CRUD (Add/Edit/Delete Drugs)</td>
+                  <td class="p-4 text-center text-emerald-600 font-bold">✓ Full</td>
+                  <td class="p-4 text-center text-emerald-600 font-bold">✓ Add/Edit</td>
+                  <td class="p-4 text-center text-zinc-300">✕ Restricted</td>
+                </tr>
+                <tr class="hover:bg-zinc-50/50">
+                  <td class="p-4 font-medium text-zinc-900">Prescription (Rx) Verification & Scan Upload</td>
+                  <td class="p-4 text-center text-emerald-600 font-bold">✓ Full</td>
+                  <td class="p-4 text-center text-emerald-600 font-bold">✓ Full</td>
+                  <td class="p-4 text-center text-zinc-300">✕ Restricted</td>
+                </tr>
+                <tr class="hover:bg-zinc-50/50">
+                  <td class="p-4 font-medium text-zinc-900">Stock Inward / Purchase Order Generation</td>
+                  <td class="p-4 text-center text-emerald-600 font-bold">✓ Full</td>
+                  <td class="p-4 text-center text-emerald-600 font-bold">✓ Full</td>
+                  <td class="p-4 text-center text-zinc-300">✕ Restricted</td>
+                </tr>
+                <tr class="hover:bg-zinc-50/50">
+                  <td class="p-4 font-medium text-zinc-900">Executive Profit Valuation & Margin Analytics</td>
+                  <td class="p-4 text-center text-emerald-600 font-bold">✓ Full</td>
+                  <td class="p-4 text-center text-zinc-300">✕ Restricted</td>
+                  <td class="p-4 text-center text-zinc-300">✕ Restricted</td>
+                </tr>
+                <tr class="hover:bg-zinc-50/50">
+                  <td class="p-4 font-medium text-zinc-900">User Account Permissions & Role Elevation</td>
+                  <td class="p-4 text-center text-emerald-600 font-bold">✓ Full</td>
+                  <td class="p-4 text-center text-zinc-300">✕ Restricted</td>
+                  <td class="p-4 text-center text-zinc-300">✕ Restricted</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ==================================================================== -->
+        <!-- CLOUD ENGINE & DATABASE ARCHITECTURE SECTION -->
+        <!-- ==================================================================== -->
+        <div id="cloud-arch" class="landing-section mt-20 pt-10 border-t border-zinc-200/80 max-w-5xl mx-auto">
+          <div class="text-center mb-8">
+            <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-medium bg-zinc-900 text-zinc-50 mb-2 shadow-2xs">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span>Dual-Engine Cloud Infrastructure</span>
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-900 mt-1">
+              SQLite Zero-Latency + Supabase Cloud PostgreSQL
+            </h2>
+            <p class="text-xs sm:text-sm text-zinc-500 mt-1.5 max-w-xl mx-auto">
+              Designed for continuous pharmacy counter uptime with instant local billing and effortless cloud synchronization.
+            </p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <!-- Card 1: Local SQLite Engine -->
+            <div class="bg-white rounded-3xl p-6 border border-zinc-200/80 shadow-xs flex flex-col justify-between">
+              <div>
+                <div class="w-9 h-9 rounded-2xl bg-zinc-100 text-zinc-900 flex items-center justify-center font-bold text-xs mb-4">
+                  SQL
+                </div>
+                <h4 class="text-sm font-bold text-zinc-900">Embedded SQLite Mode</h4>
+                <p class="text-xs text-zinc-500 mt-1 leading-relaxed">
+                  Zero external setup required. Operates offline at sub-millisecond barcode scan speeds with atomic WAL journaling.
+                </p>
+              </div>
+              <div class="mt-4 pt-3 border-t border-zinc-100 flex items-center justify-between text-[11px]">
+                <span class="text-zinc-500 font-medium">Default Mode</span>
+                <span class="text-emerald-600 font-semibold font-mono">● Active Local</span>
+              </div>
+            </div>
+
+            <!-- Card 2: Supabase Cloud PostgreSQL -->
+            <div class="bg-white rounded-3xl p-6 border border-zinc-200/80 shadow-xs flex flex-col justify-between">
+              <div>
+                <div class="w-9 h-9 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold text-xs mb-4">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 00-9.78 2.096A4.001 4.001 0 003 15z"/></svg>
+                </div>
+                <h4 class="text-sm font-bold text-zinc-900">Supabase Cloud PostgreSQL</h4>
+                <p class="text-xs text-zinc-500 mt-1 leading-relaxed">
+                  Switch to enterprise cloud Postgres by simply adding <code class="font-mono text-[10px] bg-zinc-100 px-1 py-0.5 rounded text-zinc-800">SUPABASE_DB_URL</code> in your environment.
+                </p>
+              </div>
+              <div class="mt-4 pt-3 border-t border-zinc-100 flex items-center justify-between text-[11px]">
+                <span class="text-zinc-500 font-medium">Auto Schema Migrations</span>
+                <span class="text-zinc-900 font-semibold font-mono">Postgres 16</span>
+              </div>
+            </div>
+
+            <!-- Card 3: Security & Diagnostics -->
+            <div class="bg-white rounded-3xl p-6 border border-zinc-200/80 shadow-xs flex flex-col justify-between">
+              <div>
+                <div class="w-9 h-9 rounded-2xl bg-zinc-900 text-white flex items-center justify-center font-bold text-xs mb-4">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                </div>
+                <h4 class="text-sm font-bold text-zinc-900">JWT Token Security & Health</h4>
+                <p class="text-xs text-zinc-500 mt-1 leading-relaxed">
+                  Cryptographically signed HS256 tokens with role claims. Includes real-time database telemetry endpoint.
+                </p>
+              </div>
+              <div class="mt-4 pt-3 border-t border-zinc-100 flex items-center justify-between">
+                <button onclick="auth.showSystemModal()" class="w-full py-2 bg-zinc-100 hover:bg-zinc-200 text-zinc-900 font-medium text-xs rounded-xl transition flex items-center justify-center gap-1.5">
+                  <svg class="w-3.5 h-3.5 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                  <span>Run System Diagnostics</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+
+
+    <!-- Landing Footer (ui.shadcn.com clean style) -->
+    <footer class="bg-white border-t border-zinc-200/80 py-10 text-xs text-zinc-500">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col md:flex-row items-center justify-between gap-6 pb-6 border-b border-zinc-100">
+          
+          <div class="flex items-center gap-3">
+            <div class="w-7 h-7 rounded-lg bg-zinc-900 text-white flex items-center justify-center font-bold text-xs">
+              +
+            </div>
+            <div>
+              <span class="text-zinc-900 font-semibold text-sm">PharmaPulse Management Platform</span>
+              <p class="text-[11px] text-zinc-400">CSE 326 Pharmacy Platform • Academic & Clinical Operations</p>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-5 text-xs text-zinc-500">
+            <a href="#landing-bento" onclick="event.preventDefault(); scrollToSection('landing-bento')" class="hover:text-zinc-900 transition">Showcase</a>
+            <a href="#operations" onclick="event.preventDefault(); scrollToSection('operations')" class="hover:text-zinc-900 transition">POS Billing</a>
+            <a href="#features" onclick="event.preventDefault(); scrollToSection('features')" class="hover:text-zinc-900 transition">Features</a>
+            <a href="#roles-matrix" onclick="event.preventDefault(); scrollToSection('roles-matrix')" class="hover:text-zinc-900 transition">Roles</a>
+            <a href="#cloud-arch" onclick="event.preventDefault(); scrollToSection('cloud-arch')" class="hover:text-zinc-900 transition">Cloud DB</a>
+            <a href="#auth-console" onclick="event.preventDefault(); scrollToSection('auth-console')" class="hover:text-zinc-900 transition">Sign In</a>
+            <a href="/docs" target="_blank" class="hover:text-zinc-900 transition">API Swagger</a>
+            <a href="/api/system/status" target="_blank" class="hover:text-zinc-900 transition">Telemetry</a>
+          </div>
+
+        </div>
+
+        <div class="pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-zinc-400">
+          <p>© 2026 PharmaPulse. Built with FastAPI, SQLite/Supabase, and shadcn/ui design tokens.</p>
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+            <span class="text-zinc-600 font-medium">System Engine: Active & Online</span>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+  <!-- ==================== END LANDING PAGE VIEW ==================== -->
+
+
+  <!-- Main Application Layout -->
+  <div id="app-workspace" class="flex-1 flex overflow-hidden hidden">
+
+    <!-- shadcn Sidebar Component -->
+    <aside class="w-64 bg-[#fafafa] text-zinc-600 flex flex-col shrink-0 border-r border-zinc-200 z-30 transition-all duration-200">
+      
+      <!-- Brand & Organization Header -->
+      <div class="h-14 flex items-center gap-2.5 px-4 border-b border-zinc-200 bg-white">
+        <div class="w-7 h-7 rounded-lg bg-zinc-900 flex items-center justify-center text-white shadow-xs">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
+          </svg>
+        </div>
+        <div class="min-w-0">
+          <span class="text-zinc-900 font-semibold text-sm tracking-tight flex items-center gap-1.5">
+            PharmaPulse
+            <span class="text-[9px] bg-zinc-100 text-zinc-600 border border-zinc-200 px-1 py-0.2 rounded font-mono font-medium">v2.0</span>
+          </span>
+          <p class="text-[10px] text-zinc-400 font-medium truncate">Medical Management Platform</p>
+        </div>
+      </div>
+
+      <!-- Quick Action: New Sale (F2) -->
+      <div class="p-3">
+        <button onclick="app.switchTab('pos')" class="w-full py-2 px-3 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-50 font-medium text-xs flex items-center justify-center gap-2 shadow-xs transition active:scale-[0.98]">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+          <span>New Sale / POS</span>
+          <span class="font-mono text-[10px] bg-zinc-800 text-zinc-300 px-1 py-0.2 rounded">F2</span>
+        </button>
+      </div>
+
+      <!-- Navigation Menu -->
+      <nav class="flex-1 px-3 py-1 space-y-0.5 overflow-y-auto text-xs font-medium">
+        
+        <div class="text-[10px] font-medium tracking-wider text-zinc-400 uppercase px-2.5 pt-2 pb-1">Navigation</div>
+        
+        <a href="javascript:void(0)" onclick="window.navigateToLanding()" class="nav-link flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 transition">
+          <svg class="w-4 h-4 shrink-0 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+          <span>Landing Page</span>
+        </a>
+
+        <div class="text-[10px] font-medium tracking-wider text-zinc-400 uppercase px-2.5 pt-2 pb-1">Platform</div>
+        
+        <a href="javascript:void(0)" onclick="app.switchTab('dashboard')" data-tab="dashboard" class="nav-link active flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 transition">
+          <svg class="w-4 h-4 shrink-0 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+          Dashboard
+        </a>
+
+        <a href="javascript:void(0)" onclick="app.switchTab('pos')" data-tab="pos" class="nav-link flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 transition">
+          <svg class="w-4 h-4 shrink-0 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+          POS & Billing
+        </a>
+
+        <a href="javascript:void(0)" onclick="app.switchTab('inventory')" data-tab="inventory" class="nav-link flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 transition">
+          <svg class="w-4 h-4 shrink-0 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+          Medicine Inventory
+        </a>
+
+        <a href="javascript:void(0)" onclick="app.switchTab('alerts')" data-tab="alerts" class="nav-link flex items-center justify-between px-2.5 py-1.5 rounded-lg text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 transition">
+          <div class="flex items-center gap-2.5">
+            <svg class="w-4 h-4 shrink-0 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+            Safety & Expiry Alerts
+          </div>
+          <span id="header-alert-badge" class="hidden bg-red-600 text-white text-[10px] font-bold px-1.5 py-0.2 rounded-full">0</span>
+        </a>
+
+        <a href="javascript:void(0)" onclick="app.switchTab('sales')" data-tab="sales" class="nav-link flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 transition">
+          <svg class="w-4 h-4 shrink-0 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          Invoices & Sales
+        </a>
+
+        <div class="text-[10px] font-medium tracking-wider text-zinc-400 uppercase px-2.5 pt-4 pb-1">Supply & Patients</div>
+
+        <a href="javascript:void(0)" onclick="app.switchTab('purchases')" data-tab="purchases" class="nav-link flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 transition">
+          <svg class="w-4 h-4 shrink-0 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 4H6a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-2m-4-1v8m0 0l3-3m-3 3L9 8m-5 5h2.586a1 1 0 01.707.293l2.414 2.414a1 1 0 00.707.293h3.172a1 1 0 00.707-.293l2.414-2.414a1 1 0 01.707-.293H20"/></svg>
+          Stock Inward (Purchases)
+        </a>
+
+        <a href="javascript:void(0)" onclick="app.switchTab('suppliers')" data-tab="suppliers" class="nav-link flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 transition">
+          <svg class="w-4 h-4 shrink-0 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+          Suppliers Directory
+        </a>
+
+        <a href="javascript:void(0)" onclick="app.switchTab('customers')" data-tab="customers" class="nav-link flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 transition">
+          <svg class="w-4 h-4 shrink-0 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+          Patients & Customers
+        </a>
+
+        <a href="javascript:void(0)" onclick="app.switchTab('prescriptions')" data-tab="prescriptions" class="nav-link flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 transition">
+          <svg class="w-4 h-4 shrink-0 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          Prescription Records
+        </a>
+
+        <div class="text-[10px] font-medium tracking-wider text-zinc-400 uppercase px-2.5 pt-4 pb-1">Analytics</div>
+
+        <a href="javascript:void(0)" onclick="app.switchTab('reports')" data-tab="reports" class="nav-link flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 transition">
+          <svg class="w-4 h-4 shrink-0 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+          Reports & Valuation
+        </a>
+
+        <a href="javascript:void(0)" onclick="app.switchTab('users')" data-tab="users" class="nav-link admin-only hidden flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 transition">
+          <svg class="w-4 h-4 shrink-0 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+          Staff & Roles (Admin)
+        </a>
+
+      </nav>
+
+      <!-- User Profile Footer (nav-user.tsx style) -->
+      <div class="p-3 border-t border-zinc-200 bg-white flex items-center justify-between">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <div class="w-8 h-8 rounded-full bg-zinc-100 border border-zinc-200 text-zinc-700 font-semibold flex items-center justify-center text-xs shrink-0">
+            Rx
+          </div>
+          <div class="min-w-0">
+            <div id="user-display-name" class="text-xs font-semibold text-zinc-900 truncate">Pharmacist</div>
+            <div id="user-display-email" class="text-[10px] text-zinc-400 truncate">user@pharmapulse.in</div>
+          </div>
+        </div>
+        <div class="flex items-center gap-1">
+          <button onclick="auth.showChangePasswordModal()" class="p-1.5 text-zinc-400 hover:text-zinc-900 rounded-md transition" title="Change Password & Security">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
+          </button>
+          <button onclick="auth.logout()" class="p-1.5 text-zinc-400 hover:text-zinc-900 rounded-md transition" title="Sign Out">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+          </button>
+        </div>
+      </div>
+
+    </aside>
+
+    <!-- Main Content Workspace -->
+    <div class="flex-1 flex flex-col min-w-0 overflow-hidden bg-[#fafafa]">
+      
+      <!-- Top Site Header (site-header.tsx style) -->
+      <header class="h-14 bg-white border-b border-zinc-200 px-6 flex items-center justify-between shrink-0 z-20">
+        
+        <div class="flex items-center gap-2 text-xs font-medium text-zinc-500">
+          <span class="text-zinc-900 font-semibold">Pharmacy</span>
+          <span class="text-zinc-300">/</span>
+          <span id="header-breadcrumb" class="text-zinc-600">Operations Console</span>
+        </div>
+
+        <div class="flex items-center gap-2.5">
+          <!-- Landing Page Portal Return -->
+          <button onclick="window.navigateToLanding()" class="flex items-center gap-1.5 text-[11px] font-medium text-zinc-600 hover:text-zinc-900 bg-white hover:bg-zinc-50 px-2.5 py-1 rounded-md border border-zinc-200 shadow-2xs transition" title="Go to Portal Landing Page">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+            <span class="hidden sm:inline">Landing Page</span>
+          </button>
+
+          <!-- Database & Auth Status Indicator -->
+          <button id="db-status-pill" onclick="auth.showSystemModal()" class="flex items-center gap-1.5 text-[11px] font-medium text-zinc-700 bg-white hover:bg-zinc-50 px-2.5 py-1 rounded-md border border-zinc-200 shadow-2xs transition" title="Database & Auth Diagnostics">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+            <span>DB: Checking...</span>
+          </button>
+
+          <!-- Live Date & Clock -->
+          <div id="header-live-clock" class="text-xs font-medium text-zinc-500 bg-zinc-50 px-2.5 py-1 rounded-md border border-zinc-200">
+            Loading...
+          </div>
+
+          <div class="h-4 w-px bg-zinc-200"></div>
+
+          <!-- Alert Notification Bell -->
+          <button onclick="app.switchTab('alerts')" class="relative p-1.5 rounded-md text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 transition" title="Safety Alerts">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+          </button>
+
+          <!-- Current Role Badge -->
+          <span id="user-role-badge" class="text-xs px-2 py-0.5 rounded-md font-medium bg-zinc-100 text-zinc-700 border border-zinc-200">
+            Staff
+          </span>
+        </div>
+
+      </header>
+
+      <!-- View Container Area -->
+      <main class="flex-1 overflow-y-auto p-6">
+        
+        <!-- ==================== 1. DASHBOARD VIEW (section-cards.tsx style) ==================== -->
+        <section id="view-dashboard" class="tab-view space-y-6">
+          
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <h2 class="text-xl font-semibold tracking-tight text-zinc-900">Dashboard Overview</h2>
+              <p class="text-xs text-zinc-500 mt-0.5">Real-time pharmacy dispensing income, inventory health, and alert metrics.</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="inventory.openAddModal()" class="px-3 py-1.5 text-xs font-medium bg-white border border-zinc-200 hover:bg-zinc-50 text-zinc-900 rounded-lg shadow-xs transition flex items-center gap-1.5">
+                + Add Medicine
+              </button>
+              <button onclick="app.switchTab('pos')" class="px-3.5 py-1.5 text-xs font-medium bg-zinc-900 hover:bg-zinc-800 text-zinc-50 rounded-lg shadow-xs transition flex items-center gap-1.5">
+                New Sale (F2)
+              </button>
+            </div>
+          </div>
+
+          <!-- shadcn Section Cards Grid -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            
+            <!-- Card 1: Total Revenue -->
+            <div class="shadcn-card p-5 flex flex-col justify-between">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-medium text-zinc-500 uppercase tracking-wider">Total Sales Revenue</span>
+                <span class="inline-flex items-center gap-1 rounded-md border border-zinc-200 px-1.5 py-0.5 text-[11px] font-medium text-zinc-700 bg-zinc-50">
+                  All Invoices
+                </span>
+              </div>
+              <div id="metric-total-rev" class="text-2xl sm:text-3xl font-semibold tracking-tight text-zinc-900 tabular-nums my-2">₹0.00</div>
+              <div class="text-xs text-zinc-500 flex items-center gap-1.5 pt-2 border-t border-zinc-100">
+                <span class="text-emerald-600 font-medium">✓ Lifetime gross sales</span>
+              </div>
+            </div>
+
+            <!-- Card 2: Today's Revenue -->
+            <div class="shadcn-card p-5 flex flex-col justify-between">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-medium text-zinc-500 uppercase tracking-wider">Today's Sales</span>
+                <span class="inline-flex items-center gap-1 rounded-md border border-zinc-200 px-1.5 py-0.5 text-[11px] font-medium text-zinc-700 bg-zinc-50">
+                  Live Feed
+                </span>
+              </div>
+              <div id="metric-today-rev" class="text-2xl sm:text-3xl font-semibold tracking-tight text-zinc-900 tabular-nums my-2">₹0.00</div>
+              <div id="metric-today-sales" class="text-xs text-zinc-500 pt-2 border-t border-zinc-100 font-medium">
+                0 Orders processed today
+              </div>
+            </div>
+
+            <!-- Card 3: Low Stock Warnings -->
+            <div onclick="app.switchTab('alerts')" class="shadcn-card p-5 flex flex-col justify-between cursor-pointer hover:border-amber-400 transition">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-medium text-zinc-500 uppercase tracking-wider">Low Stock Warnings</span>
+                <span class="inline-flex items-center gap-1 rounded-md border border-amber-200 px-1.5 py-0.5 text-[11px] font-medium text-amber-700 bg-amber-50">
+                  Threshold
+                </span>
+              </div>
+              <div id="metric-low-stock" class="text-2xl sm:text-3xl font-semibold tracking-tight text-amber-600 tabular-nums my-2">0</div>
+              <div class="text-xs text-zinc-500 pt-2 border-t border-zinc-100">
+                Items requiring inward reorder
+              </div>
+            </div>
+
+            <!-- Card 4: Expiry Alerts -->
+            <div onclick="app.switchTab('alerts')" class="shadcn-card p-5 flex flex-col justify-between cursor-pointer hover:border-red-400 transition">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-medium text-zinc-500 uppercase tracking-wider">Expiry Alerts</span>
+                <span class="inline-flex items-center gap-1 rounded-md border border-red-200 px-1.5 py-0.5 text-[11px] font-medium text-red-700 bg-red-50">
+                  Critical
+                </span>
+              </div>
+              <div class="flex items-baseline gap-2 my-2">
+                <span id="metric-expired" class="text-2xl sm:text-3xl font-semibold tracking-tight text-red-600 tabular-nums">0</span>
+                <span class="text-xs text-zinc-400 font-medium">expired /</span>
+                <span id="metric-expiring-soon" class="text-lg font-semibold text-amber-500 tabular-nums">0</span>
+                <span class="text-xs text-zinc-400 font-medium">&lt;60d</span>
+              </div>
+              <div class="text-xs text-zinc-500 pt-2 border-t border-zinc-100">
+                Quarantine & Priority dispensing
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Secondary Strip -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+            <div class="bg-white p-3 rounded-lg border border-zinc-200 flex items-center justify-between">
+              <span class="text-zinc-500">Active Formulations:</span>
+              <span id="metric-total-meds" class="font-semibold text-zinc-900 tabular-nums">0</span>
+            </div>
+            <div class="bg-white p-3 rounded-lg border border-zinc-200 flex items-center justify-between">
+              <span class="text-zinc-500">Registered Patients:</span>
+              <span id="metric-total-customers" class="font-semibold text-zinc-900 tabular-nums">0</span>
+            </div>
+            <div class="bg-white p-3 rounded-lg border border-zinc-200 flex items-center justify-between">
+              <span class="text-zinc-500">Currency / Locale:</span>
+              <span class="font-semibold text-zinc-900">INR (₹) • India</span>
+            </div>
+            <div class="bg-white p-3 rounded-lg border border-zinc-200 flex items-center justify-between">
+              <span class="text-zinc-500">Database Engine:</span>
+              <span class="font-semibold text-zinc-900">SQLite + SQLAlchemy</span>
+            </div>
+          </div>
+
+          <!-- Charts Grid (chart-area-interactive.tsx style) -->
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- Revenue Trend Chart -->
+            <div class="lg:col-span-2 shadcn-card p-5 flex flex-col">
+              <div class="flex items-center justify-between mb-4">
+                <div>
+                  <h3 class="font-semibold text-zinc-900 text-sm">7-Day Revenue Trend</h3>
+                  <p class="text-xs text-zinc-500">Daily pharmacy dispensing receipts (₹)</p>
+                </div>
+                <span class="text-xs font-mono text-zinc-400">Past 7 Days</span>
+              </div>
+              <div class="flex-1 min-h-[260px] relative">
+                <canvas id="sales-trend-canvas"></canvas>
+              </div>
+            </div>
+
+            <!-- Category Breakdown Chart -->
+            <div class="shadcn-card p-5 flex flex-col">
+              <div class="flex items-center justify-between mb-4">
+                <div>
+                  <h3 class="font-semibold text-zinc-900 text-sm">Stock by Category</h3>
+                  <p class="text-xs text-zinc-500">Distribution of formulations</p>
+                </div>
+              </div>
+              <div class="flex-1 min-h-[260px] relative">
+                <canvas id="category-pie-canvas"></canvas>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Tables Grid -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            
+            <!-- Top Dispensed Medicines -->
+            <div class="shadcn-card p-5">
+              <div class="flex items-center justify-between mb-4">
+                <div>
+                  <h3 class="font-semibold text-zinc-900 text-sm">Top-Selling Medicines</h3>
+                  <p class="text-xs text-zinc-500">High volume dispensing items</p>
+                </div>
+                <button onclick="app.switchTab('reports')" class="text-xs text-zinc-600 hover:text-zinc-900 font-medium">
+                  Reports →
+                </button>
+              </div>
+              <div id="dashboard-top-selling" class="space-y-2">
+                <div class="text-xs text-zinc-400 text-center py-4">Loading top medicines...</div>
+              </div>
+            </div>
+
+            <!-- Recent Counter Transactions (data-table.tsx style) -->
+            <div class="shadcn-card p-5 flex flex-col">
+              <div class="flex items-center justify-between mb-4">
+                <div>
+                  <h3 class="font-semibold text-zinc-900 text-sm">Recent Counter Sales</h3>
+                  <p class="text-xs text-zinc-500">Latest completed billing transactions</p>
+                </div>
+                <button onclick="app.switchTab('sales')" class="text-xs text-zinc-600 hover:text-zinc-900 font-medium">
+                  All Invoices →
+                </button>
+              </div>
+              <div class="overflow-x-auto flex-1">
+                <table class="w-full text-left">
+                  <thead>
+                    <tr class="border-b border-zinc-200 bg-zinc-50/75 text-[11px] font-medium text-zinc-500 uppercase tracking-wider">
+                      <th class="py-2.5 px-3">Invoice</th>
+                      <th class="py-2.5 px-3">Patient</th>
+                      <th class="py-2.5 px-3">Total</th>
+                      <th class="py-2.5 px-3">Mode</th>
+                      <th class="py-2.5 px-3">Time</th>
+                    </tr>
+                  </thead>
+                  <tbody id="dashboard-recent-sales-tbody" class="text-xs divide-y divide-zinc-100">
+                    <tr><td colspan="5" class="py-4 text-center text-zinc-400">Loading sales...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+          </div>
+
+        </section>
+
+
+        <!-- ==================== 2. POS & BILLING VIEW ==================== -->
+        <section id="view-pos" class="tab-view hidden space-y-4">
+          
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="text-xl font-semibold tracking-tight text-zinc-900">POS & Counter Billing</h2>
+              <p class="text-xs text-zinc-500">Scan barcode or search medicine to process sale and print tax receipt.</p>
+            </div>
+            <button onclick="pos.clearCart()" class="px-3 py-1.5 text-xs font-medium text-zinc-700 bg-white border border-zinc-200 rounded-lg hover:bg-zinc-50 transition shadow-xs">
+              Clear Cart
+            </button>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            
+            <!-- Left Side: Catalog Explorer (7 cols) -->
+            <div class="lg:col-span-7 space-y-3">
+              
+              <div class="bg-white p-3 rounded-lg border border-zinc-200 shadow-xs flex items-center gap-3">
+                <div class="relative flex-1">
+                  <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-zinc-400">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                  </div>
+                  <input id="pos-search-input" type="text" placeholder="Scan barcode or type medicine name, batch (Press Enter)..." class="w-full pl-9 pr-3 py-2 text-xs bg-zinc-50/50 border border-zinc-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-zinc-950 focus:bg-white text-zinc-900 placeholder:text-zinc-400 font-medium">
+                </div>
+              </div>
+
+              <div id="pos-catalog-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-[620px] overflow-y-auto pr-1">
+                <div class="col-span-full py-8 text-center text-zinc-400 text-xs">Loading catalog...</div>
+              </div>
+
+            </div>
+
+            <!-- Right Side: Active Cart (5 cols) -->
+            <div class="lg:col-span-5 bg-white rounded-lg border border-zinc-200 shadow-xs flex flex-col overflow-hidden">
+              
+              <div class="p-3.5 border-b border-zinc-200 bg-zinc-50/75 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <h3 class="font-semibold text-zinc-900 text-xs uppercase tracking-wider">Active Sale Cart</h3>
+                  <span id="pos-cart-badge" class="bg-zinc-900 text-zinc-50 text-[10px] font-bold px-1.5 py-0.2 rounded-full">0</span>
+                </div>
+                <button onclick="customers.openAddModal()" class="text-xs font-medium text-zinc-900 hover:underline">
+                  + Patient
+                </button>
+              </div>
+
+              <!-- Customer Selection -->
+              <div class="p-3.5 border-b border-zinc-100 bg-white space-y-2">
+                <label class="block text-[10px] font-medium text-zinc-500 uppercase tracking-wider">Patient / Customer</label>
+                <select id="pos-customer-select" class="w-full px-2.5 py-1.5 text-xs bg-white border border-zinc-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-zinc-950 font-medium">
+                  <option value="">Walk-in Customer (General)</option>
+                </select>
+
+                <div id="pos-patient-notes-banner" class="hidden p-2.5 bg-amber-50 border border-amber-200 rounded-lg flex items-start gap-2 text-xs text-amber-800">
+                  <svg class="w-4 h-4 text-amber-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                  <div>
+                    <span class="font-bold">Medical Alert:</span>
+                    <span id="pos-patient-notes-text">None</span>
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2 pt-1">
+                  <div>
+                    <label class="block text-[10px] font-medium text-zinc-500 uppercase tracking-wider">Prescribing Doctor</label>
+                    <input id="pos-doctor-input" type="text" placeholder="Dr. Name" class="w-full px-2.5 py-1.5 text-xs bg-white border border-zinc-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-zinc-950">
+                  </div>
+                  <div>
+                    <label class="block text-[10px] font-medium text-zinc-500 uppercase tracking-wider">Notes / Rx Ref</label>
+                    <input id="pos-notes" type="text" placeholder="Counter note" class="w-full px-2.5 py-1.5 text-xs bg-white border border-zinc-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-zinc-950">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Cart Item List -->
+              <div id="pos-cart-items" class="p-3 space-y-2 max-h-[260px] overflow-y-auto flex-1 bg-zinc-50/30">
+                <div class="py-12 text-center text-zinc-400 text-xs">Cart is empty</div>
+              </div>
+
+              <!-- Totals & Payment -->
+              <div class="p-3.5 border-t border-zinc-200 bg-white space-y-3">
+                
+                <div class="space-y-1.5 text-xs">
+                  <div class="flex justify-between text-zinc-600">
+                    <span>Subtotal</span>
+                    <span id="pos-subtotal-val" class="font-semibold text-zinc-900 tabular-nums">₹0.00</span>
+                  </div>
+
+                  <div class="flex items-center justify-between text-zinc-600">
+                    <span class="flex items-center gap-1.5">
+                      Discount (%)
+                      <input id="pos-discount-input" type="number" min="0" max="100" value="0" class="w-12 px-1 py-0.5 text-xs border border-zinc-200 rounded text-center">
+                    </span>
+                    <span id="pos-discount-val" class="font-semibold text-emerald-600 tabular-nums">-₹0.00</span>
+                  </div>
+
+                  <div class="flex items-center justify-between text-zinc-600">
+                    <span class="flex items-center gap-1.5">
+                      GST Rate (%)
+                      <input id="pos-tax-input" type="number" min="0" max="100" value="5" class="w-12 px-1 py-0.5 text-xs border border-zinc-200 rounded text-center">
+                    </span>
+                    <span id="pos-tax-val" class="font-semibold text-zinc-900 tabular-nums">₹0.00</span>
+                  </div>
+
+                  <div class="flex justify-between text-sm font-bold text-zinc-950 pt-2 border-t border-zinc-100">
+                    <span>Total Amount Due</span>
+                    <span id="pos-total-val" class="text-base font-bold tabular-nums">₹0.00</span>
+                  </div>
+                </div>
+
+                <div>
+                  <label class="block text-[10px] font-medium text-zinc-500 uppercase tracking-wider mb-1.5">Payment Method</label>
+                  <div class="grid grid-cols-4 gap-1.5 text-xs font-medium">
+                    <label class="cursor-pointer">
+                      <input type="radio" name="pos_payment_mode" value="UPI" checked class="peer sr-only">
+                      <div class="p-1.5 text-center rounded-md border border-zinc-200 peer-checked:bg-zinc-900 peer-checked:text-white peer-checked:border-zinc-900 transition">
+                        UPI / QR
+                      </div>
+                    </label>
+                    <label class="cursor-pointer">
+                      <input type="radio" name="pos_payment_mode" value="Cash" class="peer sr-only">
+                      <div class="p-1.5 text-center rounded-md border border-zinc-200 peer-checked:bg-zinc-900 peer-checked:text-white peer-checked:border-zinc-900 transition">
+                        Cash
+                      </div>
+                    </label>
+                    <label class="cursor-pointer">
+                      <input type="radio" name="pos_payment_mode" value="Card" class="peer sr-only">
+                      <div class="p-1.5 text-center rounded-md border border-zinc-200 peer-checked:bg-zinc-900 peer-checked:text-white peer-checked:border-zinc-900 transition">
+                        Card
+                      </div>
+                    </label>
+                    <label class="cursor-pointer">
+                      <input type="radio" name="pos_payment_mode" value="Insurance" class="peer sr-only">
+                      <div class="p-1.5 text-center rounded-md border border-zinc-200 peer-checked:bg-zinc-900 peer-checked:text-white peer-checked:border-zinc-900 transition">
+                        Insurance
+                      </div>
+                    </label>
+                  </div>
+                </div>
+
+                <button onclick="pos.checkout()" class="w-full py-2.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-50 font-medium rounded-lg text-xs flex items-center justify-center gap-2 shadow-xs transition active:scale-[0.98]">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                  Complete Sale & Print Invoice
+                </button>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </section>
+
+
+        <!-- ==================== 3. INVENTORY VIEW ==================== -->
+        <section id="view-inventory" class="tab-view hidden space-y-4">
+          
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <h2 class="text-xl font-semibold tracking-tight text-zinc-900">Medicine Inventory</h2>
+              <p class="text-xs text-zinc-500">Track pharmaceutical formulations, batch numbers, storage racks, and MRPs.</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="inventory.exportCSV()" class="px-3 py-1.5 text-xs font-medium bg-white border border-zinc-200 hover:bg-zinc-50 text-zinc-700 rounded-lg transition flex items-center gap-1.5 shadow-xs">
+                Export CSV
+              </button>
+              <button onclick="inventory.openAddModal()" class="px-3.5 py-1.5 text-xs font-medium bg-zinc-900 hover:bg-zinc-800 text-zinc-50 rounded-lg shadow-xs transition flex items-center gap-1.5">
+                + Add Medicine
+              </button>
+            </div>
+          </div>
+
+          <!-- Filters -->
+          <div class="bg-white p-3 rounded-lg border border-zinc-200 shadow-xs grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5">
+            <div class="lg:col-span-2">
+              <input id="inventory-search" type="text" placeholder="Search brand name, generic name, barcode, batch..." class="w-full px-3 py-1.5 text-xs bg-white border border-zinc-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-zinc-950 font-medium">
+            </div>
+            <div>
+              <select id="inventory-category-filter" class="w-full px-2.5 py-1.5 text-xs bg-white border border-zinc-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-zinc-950 font-medium">
+                <option value="All">All Categories</option>
+              </select>
+            </div>
+            <div>
+              <select id="inventory-stock-filter" class="w-full px-2.5 py-1.5 text-xs bg-white border border-zinc-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-zinc-950 font-medium">
+                <option value="All">All Stock Levels</option>
+                <option value="in_stock">In Stock</option>
+                <option value="low_stock">Low Stock (≤ Threshold)</option>
+                <option value="out_of_stock">Out of Stock</option>
+              </select>
+            </div>
+            <div>
+              <select id="inventory-expiry-filter" class="w-full px-2.5 py-1.5 text-xs bg-white border border-zinc-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-zinc-950 font-medium">
+                <option value="All">All Expiry Dates</option>
+                <option value="valid">Valid Stock</option>
+                <option value="expiring_soon">Expiring Soon (&lt; 60 Days)</option>
+                <option value="expired">Expired Stock</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Table Container -->
+          <div class="bg-white rounded-lg border border-zinc-200 shadow-xs overflow-hidden flex flex-col">
+            <div class="p-3 border-b border-zinc-100 bg-zinc-50/75 flex items-center justify-between text-xs text-zinc-500 font-medium">
+              <span id="inventory-total-count">0 medicines found</span>
+              <span>Sorted Alphabetically</span>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left">
+                <thead>
+                  <tr class="border-b border-zinc-200 bg-zinc-50/75 text-[11px] font-medium text-zinc-500 uppercase tracking-wider">
+                    <th class="py-2.5 px-3">Medicine Description</th>
+                    <th class="py-2.5 px-3">Category</th>
+                    <th class="py-2.5 px-3">Batch & Shelf</th>
+                    <th class="py-2.5 px-3">Stock Level</th>
+                    <th class="py-2.5 px-3">Expiry Status</th>
+                    <th class="py-2.5 px-3 text-right">Selling MRP</th>
+                    <th class="py-2.5 px-3 text-center">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="inventory-table-tbody" class="text-xs divide-y divide-zinc-100">
+                  <tr><td colspan="7" class="py-8 text-center text-zinc-400">Loading medicines...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </section>
+
+
+        <!-- ==================== 4. ALERTS VIEW ==================== -->
+        <section id="view-alerts" class="tab-view hidden space-y-6">
+          
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="text-xl font-semibold tracking-tight text-zinc-900">Safety & Expiry Alerts</h2>
+              <p class="text-xs text-zinc-500">Live monitoring for expired medicines, near-expiry batches, and depleted inventories.</p>
+            </div>
+            <button onclick="alerts.loadAlerts()" class="px-3 py-1.5 text-xs font-medium bg-white border border-zinc-200 rounded-lg hover:bg-zinc-50 transition shadow-xs">
+              Refresh Alerts
+            </button>
+          </div>
+
+          <div class="space-y-4">
+            
+            <!-- Expired Items -->
+            <div class="bg-white rounded-lg border border-red-200 shadow-xs overflow-hidden">
+              <div class="p-3 bg-red-50 border-b border-red-200 flex items-center justify-between">
+                <div class="flex items-center gap-2 text-red-900">
+                  <svg class="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                  <h3 class="font-semibold text-xs uppercase tracking-wider">Expired Medicines (Quarantine Required)</h3>
+                </div>
+                <span id="alerts-expired-count" class="bg-red-100 text-red-800 border border-red-200 px-2 py-0.2 rounded text-xs font-bold">0</span>
+              </div>
+              <div id="alerts-expired-container" class="p-4">
+                <div class="text-center text-xs text-zinc-400 py-4">Checking expired items...</div>
+              </div>
+            </div>
+
+            <!-- Expiring Soon -->
+            <div class="bg-white rounded-lg border border-amber-200 shadow-xs overflow-hidden">
+              <div class="p-3 bg-amber-50 border-b border-amber-200 flex items-center justify-between">
+                <div class="flex items-center gap-2 text-amber-900">
+                  <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                  <h3 class="font-semibold text-xs uppercase tracking-wider">Expiring Soon (Within 60 Days)</h3>
+                </div>
+                <span id="alerts-expiring-count" class="bg-amber-100 text-amber-800 border border-amber-200 px-2 py-0.2 rounded text-xs font-bold">0</span>
+              </div>
+              <div id="alerts-expiring-container" class="p-4">
+                <div class="text-center text-xs text-zinc-400 py-4">Checking near-expiry items...</div>
+              </div>
+            </div>
+
+            <!-- Low Stock -->
+            <div class="bg-white rounded-lg border border-zinc-200 shadow-xs overflow-hidden">
+              <div class="p-3 bg-zinc-50 border-b border-zinc-200 flex items-center justify-between">
+                <div class="flex items-center gap-2 text-zinc-900">
+                  <svg class="w-4 h-4 text-zinc-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+                  <h3 class="font-semibold text-xs uppercase tracking-wider">Low Stock & Out of Stock Alerts</h3>
+                </div>
+                <span id="alerts-lowstock-count" class="bg-zinc-100 text-zinc-800 border border-zinc-200 px-2 py-0.2 rounded text-xs font-bold">0</span>
+              </div>
+              <div id="alerts-lowstock-container" class="p-4">
+                <div class="text-center text-xs text-zinc-400 py-4">Checking inventory quantities...</div>
+              </div>
+            </div>
+
+          </div>
+
+        </section>
+
+
+        <!-- ==================== 5. SALES & INVOICES VIEW ==================== -->
+        <section id="view-sales" class="tab-view hidden space-y-4">
+          
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <h2 class="text-xl font-semibold tracking-tight text-zinc-900">Invoices & Sales History</h2>
+              <p class="text-xs text-zinc-500">Audit trail of transactions, printable receipts, and refund management.</p>
+            </div>
+            <button onclick="reports.exportSalesReport()" class="px-3 py-1.5 text-xs font-medium bg-white border border-zinc-200 hover:bg-zinc-50 text-zinc-700 rounded-lg transition flex items-center gap-1.5 shadow-xs">
+              Export Audit CSV
+            </button>
+          </div>
+
+          <div class="bg-white p-3 rounded-lg border border-zinc-200 shadow-xs grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+            <input id="sales-search-input" type="text" placeholder="Search invoice #, patient name, phone..." class="px-3 py-1.5 text-xs bg-white border border-zinc-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-zinc-950 font-medium">
+            <select id="sales-payment-filter" class="px-2.5 py-1.5 text-xs bg-white border border-zinc-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-zinc-950 font-medium">
+              <option value="All">All Payment Modes</option>
+              <option value="UPI">UPI / QR</option>
+              <option value="Cash">Cash</option>
+              <option value="Card">Card</option>
+              <option value="Insurance">Insurance</option>
+            </select>
+            <select id="sales-status-filter" class="px-2.5 py-1.5 text-xs bg-white border border-zinc-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-zinc-950 font-medium">
+              <option value="All">All Statuses</option>
+              <option value="Completed">Completed</option>
+              <option value="Refunded">Refunded / Restocked</option>
+            </select>
+          </div>
+
+          <div class="bg-white rounded-lg border border-zinc-200 shadow-xs overflow-hidden flex flex-col">
+            <div class="p-3 border-b border-zinc-100 bg-zinc-50/75 flex items-center justify-between text-xs text-zinc-500 font-medium">
+              <span id="sales-total-count">0 invoices found</span>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left">
+                <thead>
+                  <tr class="border-b border-zinc-200 bg-zinc-50/75 text-[11px] font-medium text-zinc-500 uppercase tracking-wider">
+                    <th class="py-2.5 px-3">Invoice #</th>
+                    <th class="py-2.5 px-3">Patient</th>
+                    <th class="py-2.5 px-3">Date & Time</th>
+                    <th class="py-2.5 px-3">Payment</th>
+                    <th class="py-2.5 px-3">Status</th>
+                    <th class="py-2.5 px-3 text-right">Grand Total</th>
+                    <th class="py-2.5 px-3 text-center">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="sales-table-tbody" class="text-xs divide-y divide-zinc-100">
+                  <tr><td colspan="7" class="py-8 text-center text-zinc-400">Loading invoices...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </section>
+
+
+        <!-- ==================== 6. PURCHASES VIEW ==================== -->
+        <section id="view-purchases" class="tab-view hidden space-y-4">
+          
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="text-xl font-semibold tracking-tight text-zinc-900">Stock Inward & Purchases</h2>
+              <p class="text-xs text-zinc-500">Record incoming stock batches from distributors and update inventory levels.</p>
+            </div>
+            <button onclick="purchases.openAddModal()" class="px-3.5 py-1.5 text-xs font-medium bg-zinc-900 hover:bg-zinc-800 text-zinc-50 rounded-lg shadow-xs transition flex items-center gap-1.5">
+              + Record Stock Inward
+            </button>
+          </div>
+
+          <div class="bg-white rounded-lg border border-zinc-200 shadow-xs overflow-hidden flex flex-col">
+            <div class="p-3 border-b border-zinc-100 bg-zinc-50/75 flex items-center justify-between text-xs text-zinc-500 font-medium">
+              <span id="purchases-total-count">0 purchase orders</span>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left">
+                <thead>
+                  <tr class="border-b border-zinc-200 bg-zinc-50/75 text-[11px] font-medium text-zinc-500 uppercase tracking-wider">
+                    <th class="py-2.5 px-3">Supplier PO #</th>
+                    <th class="py-2.5 px-3">Supplier Name</th>
+                    <th class="py-2.5 px-3">Date</th>
+                    <th class="py-2.5 px-3">Items Received</th>
+                    <th class="py-2.5 px-3 text-right">Total Cost</th>
+                    <th class="py-2.5 px-3 text-center">Payment</th>
+                  </tr>
+                </thead>
+                <tbody id="purchases-table-tbody" class="text-xs divide-y divide-zinc-100">
+                  <tr><td colspan="6" class="py-8 text-center text-zinc-400">Loading purchases...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </section>
+
+
+        <!-- ==================== 7. SUPPLIERS VIEW ==================== -->
+        <section id="view-suppliers" class="tab-view hidden space-y-4">
+          
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="text-xl font-semibold tracking-tight text-zinc-900">Suppliers Directory</h2>
+              <p class="text-xs text-zinc-500">Pharmaceutical distributors, GST registration numbers, and purchase totals.</p>
+            </div>
+            <button onclick="suppliers.openAddModal()" class="px-3.5 py-1.5 text-xs font-medium bg-zinc-900 hover:bg-zinc-800 text-zinc-50 rounded-lg shadow-xs transition flex items-center gap-1.5">
+              + Add Supplier
+            </button>
+          </div>
+
+          <div class="bg-white rounded-lg border border-zinc-200 shadow-xs overflow-hidden flex flex-col">
+            <div class="p-3 border-b border-zinc-100 bg-zinc-50/75 flex items-center justify-between text-xs text-zinc-500 font-medium">
+              <span id="suppliers-total-count">0 suppliers registered</span>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left">
+                <thead>
+                  <tr class="border-b border-zinc-200 bg-zinc-50/75 text-[11px] font-medium text-zinc-500 uppercase tracking-wider">
+                    <th class="py-2.5 px-3">Distributor Name</th>
+                    <th class="py-2.5 px-3">Contact & GSTIN</th>
+                    <th class="py-2.5 px-3">Phone & Email</th>
+                    <th class="py-2.5 px-3">Address</th>
+                    <th class="py-2.5 px-3 text-right">Lifetime Inward</th>
+                    <th class="py-2.5 px-3 text-center">Edit</th>
+                  </tr>
+                </thead>
+                <tbody id="suppliers-table-tbody" class="text-xs divide-y divide-zinc-100">
+                  <tr><td colspan="6" class="py-8 text-center text-zinc-400">Loading suppliers...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </section>
+
+
+        <!-- ==================== 8. CUSTOMERS VIEW ==================== -->
+        <section id="view-customers" class="tab-view hidden space-y-4">
+          
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <h2 class="text-xl font-semibold tracking-tight text-zinc-900">Patients & Customers</h2>
+              <p class="text-xs text-zinc-500">Patient profiles, critical drug allergy records, and order histories.</p>
+            </div>
+            <button onclick="customers.openAddModal()" class="px-3.5 py-1.5 text-xs font-medium bg-zinc-900 hover:bg-zinc-800 text-zinc-50 rounded-lg shadow-xs transition flex items-center gap-1.5">
+              + Add Patient
+            </button>
+          </div>
+
+          <div class="bg-white p-3 rounded-lg border border-zinc-200 shadow-xs">
+            <input id="customers-search-input" type="text" placeholder="Search patient by name, phone number, email..." class="w-full px-3 py-1.5 text-xs bg-white border border-zinc-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-zinc-950 font-medium">
+          </div>
+
+          <div class="bg-white rounded-lg border border-zinc-200 shadow-xs overflow-hidden flex flex-col">
+            <div class="p-3 border-b border-zinc-100 bg-zinc-50/75 flex items-center justify-between text-xs text-zinc-500 font-medium">
+              <span id="customers-total-count">0 customers registered</span>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left">
+                <thead>
+                  <tr class="border-b border-zinc-200 bg-zinc-50/75 text-[11px] font-medium text-zinc-500 uppercase tracking-wider">
+                    <th class="py-2.5 px-3">Patient Name</th>
+                    <th class="py-2.5 px-3">Phone Number</th>
+                    <th class="py-2.5 px-3">Allergies & Medical Alerts</th>
+                    <th class="py-2.5 px-3 text-center">Orders</th>
+                    <th class="py-2.5 px-3 text-right">Total Spent</th>
+                    <th class="py-2.5 px-3 text-center">Profile</th>
+                  </tr>
+                </thead>
+                <tbody id="customers-table-tbody" class="text-xs divide-y divide-zinc-100">
+                  <tr><td colspan="6" class="py-8 text-center text-zinc-400">Loading customers...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </section>
+
+
+        <!-- ==================== 9. PRESCRIPTIONS VIEW ==================== -->
+        <section id="view-prescriptions" class="tab-view hidden space-y-4">
+          
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="text-xl font-semibold tracking-tight text-zinc-900">Prescription Records (Rx)</h2>
+              <p class="text-xs text-zinc-500">Record doctor prescriptions, verify medical legitimacy, and archive scans.</p>
+            </div>
+            <button onclick="prescriptions.openAddModal()" class="px-3.5 py-1.5 text-xs font-medium bg-zinc-900 hover:bg-zinc-800 text-zinc-50 rounded-lg shadow-xs transition flex items-center gap-1.5">
+              + Upload Prescription
+            </button>
+          </div>
+
+          <div class="bg-white rounded-lg border border-zinc-200 shadow-xs overflow-hidden flex flex-col">
+            <div class="p-3 border-b border-zinc-100 bg-zinc-50/75 flex items-center justify-between text-xs text-zinc-500 font-medium">
+              <span id="prescriptions-total-count">0 prescription records</span>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left">
+                <thead>
+                  <tr class="border-b border-zinc-200 bg-zinc-50/75 text-[11px] font-medium text-zinc-500 uppercase tracking-wider">
+                    <th class="py-2.5 px-3">Patient Name</th>
+                    <th class="py-2.5 px-3">Doctor & License</th>
+                    <th class="py-2.5 px-3">Date</th>
+                    <th class="py-2.5 px-3">Prescription Details</th>
+                    <th class="py-2.5 px-3">Status</th>
+                    <th class="py-2.5 px-3 text-center">Update Status</th>
+                  </tr>
+                </thead>
+                <tbody id="prescriptions-table-tbody" class="text-xs divide-y divide-zinc-100">
+                  <tr><td colspan="6" class="py-8 text-center text-zinc-400">Loading prescriptions...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </section>
+
+
+        <!-- ==================== 10. REPORTS VIEW ==================== -->
+        <section id="view-reports" class="tab-view hidden space-y-6">
+          
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="text-xl font-semibold tracking-tight text-zinc-900">Reports & Stock Valuation</h2>
+              <p class="text-xs text-zinc-500">Comprehensive inventory valuation, gross margins, and payment breakdown.</p>
+            </div>
+            <button onclick="reports.exportSalesReport()" class="px-3.5 py-1.5 text-xs font-medium bg-zinc-900 hover:bg-zinc-800 text-zinc-50 rounded-lg shadow-xs transition flex items-center gap-1.5">
+              Export Audit CSV
+            </button>
+          </div>
+
+          <!-- Valuation Cards -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="shadcn-card p-5">
+              <div class="text-xs font-medium text-zinc-500 uppercase tracking-wider">Cost Valuation</div>
+              <div id="rep-val-cost" class="text-2xl font-semibold tracking-tight text-zinc-900 tabular-nums my-1">₹0.00</div>
+              <div class="text-xs text-zinc-400">Total acquisition cost</div>
+            </div>
+
+            <div class="shadcn-card p-5">
+              <div class="text-xs font-medium text-zinc-500 uppercase tracking-wider">Retail Valuation</div>
+              <div id="rep-val-retail" class="text-2xl font-semibold tracking-tight text-zinc-900 tabular-nums my-1">₹0.00</div>
+              <div class="text-xs text-zinc-400">Estimated retail value (MRP)</div>
+            </div>
+
+            <div class="shadcn-card p-5">
+              <div class="text-xs font-medium text-zinc-500 uppercase tracking-wider">Expected Profit</div>
+              <div id="rep-val-profit" class="text-2xl font-semibold tracking-tight text-emerald-600 tabular-nums my-1">₹0.00</div>
+              <div class="text-xs text-zinc-400">Gross margin potential</div>
+            </div>
+
+            <div class="shadcn-card p-5">
+              <div class="text-xs font-medium text-zinc-500 uppercase tracking-wider">Profit Margin %</div>
+              <div id="rep-val-margin" class="text-2xl font-semibold tracking-tight text-zinc-900 tabular-nums my-1">0%</div>
+              <div class="text-xs text-zinc-400">Average markup margin</div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="shadcn-card p-5">
+              <h3 class="font-semibold text-zinc-900 text-sm mb-3">Revenue by Payment Method</h3>
+              <div id="rep-payment-methods" class="space-y-2">
+                <div class="text-xs text-zinc-400">Loading payment data...</div>
+              </div>
+            </div>
+
+            <div class="shadcn-card p-5">
+              <h3 class="font-semibold text-zinc-900 text-sm mb-3">Inventory Statistics</h3>
+              <div class="space-y-3 text-xs">
+                <div class="flex justify-between p-2.5 bg-zinc-50 rounded-lg border border-zinc-100">
+                  <span class="text-zinc-600">Total Unique Medicine Formulations:</span>
+                  <span id="rep-val-items" class="font-semibold text-zinc-900 tabular-nums">0</span>
+                </div>
+                <div class="flex justify-between p-2.5 bg-zinc-50 rounded-lg border border-zinc-100">
+                  <span class="text-zinc-600">Total Physical Units Across Batches:</span>
+                  <span id="rep-val-units" class="font-semibold text-zinc-900 tabular-nums">0</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </section>
+
+
+        <!-- ==================== 11. USERS VIEW ==================== -->
+        <section id="view-users" class="tab-view hidden space-y-4">
+          
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="text-xl font-semibold tracking-tight text-zinc-900">Staff & Role Permissions</h2>
+              <p class="text-xs text-zinc-500">Manage pharmacists, cashiers, administrators, and access privileges.</p>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-lg border border-zinc-200 shadow-xs overflow-hidden flex flex-col">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left">
+                <thead>
+                  <tr class="border-b border-zinc-200 bg-zinc-50/75 text-[11px] font-medium text-zinc-500 uppercase tracking-wider">
+                    <th class="py-2.5 px-3">Staff Member</th>
+                    <th class="py-2.5 px-3">Contact</th>
+                    <th class="py-2.5 px-3">Role Permission</th>
+                    <th class="py-2.5 px-3">Account Status</th>
+                    <th class="py-2.5 px-3 text-center">Toggle Access</th>
+                  </tr>
+                </thead>
+                <tbody id="users-table-tbody" class="text-xs divide-y divide-zinc-100">
+                  <tr><td colspan="5" class="py-8 text-center text-zinc-400">Loading users...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </section>
+
+      </main>
+
+    </div>
+
+  </div> <!-- /#app-workspace -->
+
+
+  <!-- ==================== MODALS ==================== -->
+
+  <!-- 1. Authentication Dialog (shadcn authentication style) -->
+  <div id="auth-modal" class="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-xl max-w-sm w-full shadow-2xl overflow-hidden border border-zinc-200 flex flex-col">
+      
+      <div class="p-6 text-center border-b border-zinc-100">
+        <div class="w-9 h-9 rounded-lg bg-zinc-900 text-white flex items-center justify-center mx-auto mb-2.5 shadow-xs">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+        </div>
+        <h3 class="text-base font-semibold tracking-tight text-zinc-900">Sign in to PharmaPulse</h3>
+        <p class="text-xs text-zinc-500 mt-1">Enter your credentials to access the pharmacy workspace.</p>
+      </div>
+
+      <!-- Quick 1-Click Demo Buttons -->
+      <div class="p-3 bg-zinc-50 border-b border-zinc-100 flex items-center justify-center gap-2">
+        <span class="text-[10px] font-medium text-zinc-500 uppercase">1-Click Demo:</span>
+        <button onclick="auth.login('admin', 'admin123')" class="px-2.5 py-1 text-xs font-medium bg-white text-zinc-900 rounded-md border border-zinc-200 hover:bg-zinc-100 shadow-xs transition">
+          Admin
+        </button>
+        <button onclick="auth.login('pharma', 'pharma123')" class="px-2.5 py-1 text-xs font-medium bg-white text-zinc-900 rounded-md border border-zinc-200 hover:bg-zinc-100 shadow-xs transition">
+          Pharmacist
+        </button>
+      </div>
+
+      <div class="p-5">
+        
+        <div class="flex border-b border-zinc-200 mb-4">
+          <button id="auth-tab-login" onclick="toggleAuthTab('login')" class="flex-1 pb-2 font-medium text-xs text-zinc-900 border-b-2 border-zinc-900">
+            Sign In
+          </button>
+          <button id="auth-tab-register" onclick="toggleAuthTab('register')" class="flex-1 pb-2 font-medium text-xs text-zinc-400 hover:text-zinc-600">
+            Create Account
+          </button>
+        </div>
+
+        <form id="login-form" onsubmit="event.preventDefault(); auth.login(document.getElementById('login-username').value, document.getElementById('login-password').value)" class="space-y-3">
+          <div>
+            <label class="block text-xs font-medium text-zinc-700 mb-1">Username or Email</label>
+            <input id="login-username" type="text" value="admin" required class="w-full px-3 py-1.5 text-xs bg-white border border-zinc-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-zinc-950">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-zinc-700 mb-1">Password</label>
+            <input id="login-password" type="password" value="admin123" required class="w-full px-3 py-1.5 text-xs bg-white border border-zinc-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-zinc-950">
+          </div>
+          <button type="submit" class="w-full py-2 bg-zinc-900 hover:bg-zinc-800 text-zinc-50 font-medium rounded-lg text-xs shadow-xs transition mt-2">
+            Sign In
+          </button>
+        </form>
+
+        <form id="register-form" onsubmit="event.preventDefault(); auth.register({
+          username: document.getElementById('reg-username').value,
+          email: document.getElementById('reg-email').value,
+          full_name: document.getElementById('reg-fullname').value,
+          password: document.getElementById('reg-password').value,
+          role: document.getElementById('reg-role').value
+        })" class="space-y-2.5 hidden">
+          <div>
+            <label class="block text-[11px] font-medium text-zinc-700 mb-0.5">Full Name *</label>
+            <input id="reg-fullname" type="text" placeholder="Dr. Rajesh Sharma" required class="w-full px-3 py-1.5 text-xs bg-white border border-zinc-200 rounded-lg focus:ring-1 focus:ring-zinc-950">
+          </div>
+          <div>
+            <label class="block text-[11px] font-medium text-zinc-700 mb-0.5">Username *</label>
+            <input id="reg-username" type="text" placeholder="rsharma" required class="w-full px-3 py-1.5 text-xs bg-white border border-zinc-200 rounded-lg focus:ring-1 focus:ring-zinc-950">
+          </div>
+          <div>
+            <label class="block text-[11px] font-medium text-zinc-700 mb-0.5">Email Address *</label>
+            <input id="reg-email" type="email" placeholder="sharma@pharmapulse.in" required class="w-full px-3 py-1.5 text-xs bg-white border border-zinc-200 rounded-lg focus:ring-1 focus:ring-zinc-950">
+          </div>
+          <div>
+            <label class="block text-[11px] font-medium text-zinc-700 mb-0.5">Password *</label>
+            <input id="reg-password" type="password" required class="w-full px-3 py-1.5 text-xs bg-white border border-zinc-200 rounded-lg focus:ring-1 focus:ring-zinc-950">
+          </div>
+          <div>
+            <label class="block text-[11px] font-medium text-zinc-700 mb-0.5">Role</label>
+            <select id="reg-role" class="w-full px-3 py-1.5 text-xs bg-white border border-zinc-200 rounded-lg focus:ring-1 focus:ring-zinc-950 font-medium">
+              <option value="pharmacist">Pharmacist</option>
+              <option value="cashier">Cashier</option>
+              <option value="admin">Administrator</option>
+            </select>
+          </div>
+          <button type="submit" class="w-full py-2 bg-zinc-900 hover:bg-zinc-800 text-zinc-50 font-medium rounded-lg text-xs shadow-xs transition mt-2">
+            Create Account
+          </button>
+        </form>
+
+      </div>
+
+    </div>
+  </div>
+
+
+
+
+  <!-- 2. Printable Tax Invoice Dialog -->
+  <div id="invoice-modal" class="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-xl max-w-xl w-full shadow-2xl overflow-hidden border border-zinc-200 flex flex-col max-h-[90vh]">
+      
+      <div class="p-3 bg-zinc-900 text-zinc-50 flex items-center justify-between no-print">
+        <span class="text-xs font-medium flex items-center gap-2">
+          <span>Official Tax Invoice Preview</span>
+        </span>
+        <div class="flex items-center gap-2">
+          <button onclick="pos.printInvoice()" class="px-2.5 py-1 bg-white text-zinc-900 text-xs font-medium rounded-md shadow-xs transition flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+            Print Receipt
+          </button>
+          <button onclick="pos.closeInvoiceModal()" class="text-zinc-400 hover:text-white p-1">✕</button>
+        </div>
+      </div>
+
+      <div id="invoice-printable" class="p-6 overflow-y-auto bg-white font-sans text-zinc-800 space-y-4">
+        
+        <div class="text-center pb-3 border-b border-zinc-200">
+          <h2 class="text-lg font-bold text-zinc-950 uppercase tracking-tight">PharmaPulse Chemists & Druggists Ltd.</h2>
+          <p class="text-xs text-zinc-600 font-medium">Licensed Retail Chemists • Drug Lic: DL-2026-99124 • GSTIN: 07AABCP1234A1Z5</p>
+          <p class="text-xs text-zinc-400">Connaught Place, New Delhi 110001 • Ph: +91 98765 43210</p>
+        </div>
+
+        <div class="grid grid-cols-2 text-xs border-b border-zinc-200 pb-3 gap-2">
+          <div>
+            <div class="text-zinc-400">Invoice Number:</div>
+            <div id="inv-number" class="font-mono font-bold text-zinc-900">INV-000000</div>
+            <div class="text-zinc-400 mt-1">Date & Time:</div>
+            <div id="inv-date" class="font-medium text-zinc-800">--</div>
+            <div class="text-zinc-400 mt-1">Cashier:</div>
+            <div id="inv-cashier" class="font-medium text-zinc-800">Pharmacist</div>
+          </div>
+          <div class="text-right">
+            <div class="text-zinc-400">Patient / Customer:</div>
+            <div id="inv-customer-name" class="font-bold text-zinc-900">Walk-in</div>
+            <div id="inv-customer-phone" class="text-zinc-600 font-mono">--</div>
+            <div class="text-zinc-400 mt-1">Prescribed By:</div>
+            <div id="inv-doctor" class="font-medium text-zinc-800">OTC / Dr. Unspecified</div>
+            <div class="text-zinc-400 mt-1">Payment Method:</div>
+            <div id="inv-payment-mode" class="font-bold text-zinc-900">UPI / QR</div>
+          </div>
+        </div>
+
+        <table class="w-full text-xs">
+          <thead>
+            <tr class="border-b border-zinc-200 font-semibold text-zinc-700">
+              <th class="py-1 text-left">Item Description</th>
+              <th class="py-1 text-center">Qty</th>
+              <th class="py-1 text-right">Price</th>
+              <th class="py-1 text-right">Total</th>
+            </tr>
+          </thead>
+          <tbody id="inv-items-tbody"></tbody>
+        </table>
+
+        <div class="border-t border-zinc-200 pt-3 space-y-1 text-xs">
+          <div class="flex justify-between text-zinc-600">
+            <span>Subtotal</span>
+            <span id="inv-subtotal" class="font-medium tabular-nums">₹0.00</span>
+          </div>
+          <div class="flex justify-between text-zinc-600">
+            <span>Discount</span>
+            <span id="inv-discount" class="font-medium tabular-nums">-₹0.00</span>
+          </div>
+          <div class="flex justify-between text-zinc-600">
+            <span>GST (CGST 2.5% + SGST 2.5%)</span>
+            <span id="inv-tax" class="font-medium tabular-nums">₹0.00</span>
+          </div>
+          <div class="flex justify-between text-sm font-bold text-zinc-950 pt-2 border-t border-zinc-200">
+            <span>GRAND TOTAL</span>
+            <span id="inv-grand-total" class="text-base font-bold tabular-nums">₹0.00</span>
+          </div>
+        </div>
+
+        <div class="pt-3 border-t border-dashed border-zinc-300 text-center text-[10px] text-zinc-400 space-y-0.5">
+          <p class="font-medium text-zinc-600">Thank you for choosing PharmaPulse! Wishing you a speedy recovery.</p>
+          <div class="font-mono text-[9px]">*** Official Computer Generated Tax Receipt ***</div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+
+
+
+  <!-- 3. Medicine Add / Edit Dialog -->
+  <div id="medicine-modal" class="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-xl max-w-xl w-full shadow-2xl overflow-hidden border border-zinc-200 flex flex-col max-h-[90vh]">
+      
+      <div class="p-4 border-b border-zinc-200 flex items-center justify-between bg-zinc-50/75">
+        <h3 id="medicine-modal-title" class="font-semibold text-zinc-900 text-sm">Add New Medicine</h3>
+        <button onclick="inventory.closeModal()" class="text-zinc-400 hover:text-zinc-700 p-1">✕</button>
+      </div>
+
+      <form id="medicine-form" onsubmit="inventory.saveMedicine(event)" class="p-5 overflow-y-auto space-y-3.5 text-xs">
+        <input type="hidden" id="med-form-id">
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-medium text-zinc-700 mb-1">Brand Name *</label>
+            <input id="med-form-name" type="text" placeholder="e.g. Dolo 650mg" required class="w-full px-3 py-1.5 bg-white border border-zinc-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-zinc-950 font-semibold">
+          </div>
+          <div>
+            <label class="block font-medium text-zinc-700 mb-1">Generic Name / Composition</label>
+            <input id="med-form-generic" type="text" placeholder="e.g. Paracetamol IP" class="w-full px-3 py-1.5 bg-white border border-zinc-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-zinc-950">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div>
+            <label class="block font-medium text-zinc-700 mb-1">Category *</label>
+            <select id="med-form-category" required class="w-full px-2.5 py-1.5 bg-white border border-zinc-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-zinc-950 font-medium">
+            </select>
+          </div>
+          <div>
+            <label class="block font-medium text-zinc-700 mb-1">Dosage Form</label>
+            <select id="med-form-dosage" class="w-full px-2.5 py-1.5 bg-white border border-zinc-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-zinc-950 font-medium">
+              <option value="Tablet">Tablet</option>
+              <option value="Capsule">Capsule</option>
+              <option value="Syrup">Syrup</option>
+              <option value="Injection">Injection</option>
+              <option value="Ointment">Ointment / Cream</option>
+              <option value="Drops">Eye/Ear Drops</option>
+              <option value="Inhaler">Inhaler</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-medium text-zinc-700 mb-1">Strength</label>
+            <input id="med-form-strength" type="text" placeholder="e.g. 650mg, 100ml" class="w-full px-3 py-1.5 bg-white border border-zinc-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-zinc-950">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div>
+            <label class="block font-medium text-zinc-700 mb-1">Manufacturer *</label>
+            <input id="med-form-manufacturer" type="text" placeholder="e.g. Sun Pharma" required class="w-full px-3 py-1.5 bg-white border border-zinc-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-zinc-950">
+          </div>
+          <div>
+            <label class="block font-medium text-zinc-700 mb-1">Batch Number *</label>
+            <input id="med-form-batch" type="text" placeholder="e.g. PCM-2025-01" required class="w-full px-3 py-1.5 bg-white border border-zinc-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-zinc-950 font-mono">
+          </div>
+          <div>
+            <label class="block font-medium text-zinc-700 mb-1">Barcode / SKU</label>
+            <input id="med-form-barcode" type="text" placeholder="e.g. 89010010001" class="w-full px-3 py-1.5 bg-white border border-zinc-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-zinc-950 font-mono">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+          <div>
+            <label class="block font-medium text-zinc-700 mb-1">Cost Price (₹) *</label>
+            <input id="med-form-purchase-price" type="number" step="0.01" min="0" required class="w-full px-3 py-1.5 bg-white border border-zinc-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-zinc-950 font-bold tabular-nums">
+          </div>
+          <div>
+            <label class="block font-medium text-zinc-700 mb-1">Selling MRP (₹) *</label>
+            <input id="med-form-selling-price" type="number" step="0.01" min="0" required class="w-full px-3 py-1.5 bg-white border border-zinc-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-zinc-950 font-bold tabular-nums">
+          </div>
+          <div>
+            <label class="block font-medium text-zinc-700 mb-1">Stock Quantity *</label>
+            <input id="med-form-stock" type="number" min="0" required class="w-full px-3 py-1.5 bg-white border border-zinc-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-zinc-950 font-bold tabular-nums">
+          </div>
+          <div>
+            <label class="block font-medium text-zinc-700 mb-1">Min Reorder Alert</label>
+            <input id="med-form-min-stock" type="number" min="0" value="15" required class="w-full px-3 py-1.5 bg-white border border-zinc-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-zinc-950 tabular-nums">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-medium text-zinc-700 mb-1">Expiry Date *</label>
+            <input id="med-form-expiry" type="date" required class="w-full px-3 py-1.5 bg-white border border-zinc-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-zinc-950 font-medium">
+          </div>
+          <div>
+            <label class="block font-medium text-zinc-700 mb-1">Storage Shelf / Rack</label>
+            <input id="med-form-location" type="text" placeholder="e.g. Rack A-1, Fridge 1" class="w-full px-3 py-1.5 bg-white border border-zinc-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-zinc-950">
+          </div>
+        </div>
+
+        <div>
+          <label class="flex items-center gap-2 cursor-pointer font-medium text-zinc-700">
+            <input id="med-form-rx" type="checkbox" class="w-3.5 h-3.5 rounded border-zinc-300 text-zinc-900 focus:ring-zinc-950">
+            <span>Requires Doctor's Prescription (Rx / Schedule H)</span>
+          </label>
+        </div>
+
+        <div>
+          <label class="block font-medium text-zinc-700 mb-1">Description / Indications</label>
+          <textarea id="med-form-desc" rows="2" placeholder="Indications, precautions, dosage guidelines..." class="w-full px-3 py-1.5 bg-white border border-zinc-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-zinc-950"></textarea>
+        </div>
+
+        <div class="pt-3 border-t border-zinc-200 flex justify-end gap-2">
+          <button type="button" onclick="inventory.closeModal()" class="px-3 py-1.5 border border-zinc-200 text-zinc-700 font-medium rounded-lg hover:bg-zinc-50 shadow-xs">Cancel</button>
+          <button type="submit" class="px-4 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-50 font-medium rounded-lg shadow-xs transition">Save Medicine</button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+
+
+
+
+  <!-- 4. Supplier Modal -->
+  <div id="supplier-modal" class="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-xl max-w-md w-full shadow-2xl overflow-hidden border border-zinc-200 flex flex-col">
+      <div class="p-4 border-b border-zinc-200 flex items-center justify-between bg-zinc-50/75">
+        <h3 id="supplier-modal-title" class="font-semibold text-zinc-900 text-sm">Add Supplier</h3>
+        <button onclick="suppliers.closeModal()" class="text-zinc-400 hover:text-zinc-700 p-1">✕</button>
+      </div>
+      <form id="supplier-form" onsubmit="suppliers.saveSupplier(event)" class="p-5 space-y-3 text-xs">
+        <input type="hidden" id="sup-form-id">
+        <div>
+          <label class="block font-medium text-zinc-700 mb-1">Company / Supplier Name *</label>
+          <input id="sup-form-name" type="text" required class="w-full px-3 py-1.5 bg-white border border-zinc-200 rounded-lg focus:ring-1 focus:ring-zinc-950">
+        </div>
+        <div class="grid grid-cols-2 gap-2.5">
+          <div>
+            <label class="block font-medium text-zinc-700 mb-1">Contact Person</label>
+            <input id="sup-form-contact" type="text" class="w-full px-3 py-1.5 bg-white border border-zinc-200 rounded-lg focus:ring-1 focus:ring-zinc-950">
+          </div>
+          <div>
+            <label class="block font-medium text-zinc-700 mb-1">GSTIN Number</label>
+            <input id="sup-form-taxid" type="text" placeholder="27AABCC1234F1Z8" class="w-full px-3 py-1.5 bg-white border border-zinc-200 rounded-lg focus:ring-1 focus:ring-zinc-950 font-mono">
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-2.5">
+          <div>
+            <label class="block font-medium text-zinc-700 mb-1">Phone Number *</label>
+            <input id="sup-form-phone" type="text" placeholder="+91 98..." required class="w-full px-3 py-1.5 bg-white border border-zinc-200 rounded-lg focus:ring-1 focus:ring-zinc-950">
+          </div>
+          <div>
+            <label class="block font-medium text-zinc-700 mb-1">Email</label>
+            <input id="sup-form-email" type="email" class="w-full px-3 py-1.5 bg-white border border-zinc-200 rounded-lg focus:ring-1 focus:ring-zinc-950">
+          </div>
+        </div>
+        <div>
+          <label class="block font-medium text-zinc-700 mb-1">Depot / Warehouse Address</label>
+          <textarea id="sup-form-address" rows="2" class="w-full px-3 py-1.5 bg-white border border-zinc-200 rounded-lg focus:ring-1 focus:ring-zinc-950"></textarea>
+        </div>
+        <div class="pt-3 border-t border-zinc-200 flex justify-end gap-2">
+          <button type="button" onclick="suppliers.closeModal()" class="px-3 py-1.5 border border-zinc-200 text-zinc-700 font-medium rounded-lg hover:bg-zinc-50 shadow-xs">Cancel</button>
+          <button type="submit" class="px-4 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-50 font-medium rounded-lg shadow-xs">Save Supplier</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+
+
+  <!-- 5. Purchase Order (Stock Inward) Dialog -->
+  <div id="purchase-modal" class="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-xl max-w-2xl w-full shadow-2xl overflow-hidden border border-zinc-200 flex flex-col max-h-[90vh]">
+      
+      <div class="p-4 border-b border-zinc-200 flex items-center justify-between bg-zinc-50/75">
+        <div>
+          <h3 class="font-semibold text-zinc-900 text-sm">Record Stock Inward (Purchase Order)</h3>
+          <p class="text-xs text-zinc-500">Receive batches from suppliers and automatically increment inventory levels.</p>
+        </div>
+        <button onclick="purchases.closeModal()" class="text-zinc-400 hover:text-zinc-700 p-1">✕</button>
+      </div>
+
+      <form id="purchase-form" onsubmit="purchases.savePurchase(event)" class="p-5 overflow-y-auto space-y-3.5 text-xs">
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-2.5">
+          <div>
+            <label class="block font-medium text-zinc-700 mb-1">Supplier *</label>
+            <select id="po-form-supplier" required class="w-full px-2.5 py-1.5 bg-white border border-zinc-200 rounded-lg font-medium"></select>
+          </div>
+          <div>
+            <label class="block font-medium text-zinc-700 mb-1">Supplier Invoice # *</label>
+            <input id="po-form-invoice" type="text" placeholder="e.g. CIPLA-INV-8821" required class="w-full px-3 py-1.5 bg-white border border-zinc-200 rounded-lg font-mono">
+          </div>
+          <div>
+            <label class="block font-medium text-zinc-700 mb-1">Date</label>
+            <input id="po-form-date" type="date" class="w-full px-3 py-1.5 bg-white border border-zinc-200 rounded-lg font-medium">
+          </div>
+        </div>
+
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <span class="font-semibold text-zinc-700 uppercase tracking-wider text-[10px]">Inward Medicine Items</span>
+            <button type="button" onclick="purchases.addPurchaseRow()" class="text-xs font-medium text-zinc-900 hover:underline">
+              + Add Item
+            </button>
+          </div>
+          <div id="po-items-container" class="space-y-2 max-h-[240px] overflow-y-auto pr-1"></div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-2.5 pt-2 border-t border-zinc-200">
+          <div>
+            <label class="block font-medium text-zinc-700 mb-1">Payment Status</label>
+            <select id="po-form-payment" class="w-full px-2.5 py-1.5 bg-white border border-zinc-200 rounded-lg font-medium">
+              <option value="Paid">Paid in Full</option>
+              <option value="Pending">Pending / Credit</option>
+              <option value="Partial">Partial Payment</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-medium text-zinc-700 mb-1">Notes</label>
+            <input id="po-form-notes" type="text" placeholder="Inward inspection notes..." class="w-full px-3 py-1.5 bg-white border border-zinc-200 rounded-lg">
+          </div>
+        </div>
+
+        <div class="pt-3 border-t border-zinc-200 flex items-center justify-between">
+          <div>
+            <span class="text-zinc-500">Inward Total:</span>
+            <span id="po-total-display" class="font-bold text-zinc-900 text-sm ml-1 tabular-nums">₹0.00</span>
+          </div>
+          <div class="flex gap-2">
+            <button type="button" onclick="purchases.closeModal()" class="px-3 py-1.5 border border-zinc-200 text-zinc-700 font-medium rounded-lg hover:bg-zinc-50 shadow-xs">Cancel</button>
+            <button type="submit" class="px-4 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-50 font-medium rounded-lg shadow-xs">Complete Inward</button>
+          </div>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+
+
+
+
+  <!-- 6. Customer Add Dialog -->
+  <div id="customer-modal" class="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-xl max-w-sm w-full shadow-2xl overflow-hidden border border-zinc-200 flex flex-col">
+      <div class="p-4 border-b border-zinc-200 flex items-center justify-between bg-zinc-50/75">
+        <h3 class="font-semibold text-zinc-900 text-sm">Add Patient Profile</h3>
+        <button onclick="customers.closeModal()" class="text-zinc-400 hover:text-zinc-700 p-1">✕</button>
+      </div>
+      <form id="customer-form" onsubmit="customers.saveCustomer(event)" class="p-5 space-y-3 text-xs">
+        <input type="hidden" id="cust-form-id">
+        <div>
+          <label class="block font-medium text-zinc-700 mb-1">Patient Full Name *</label>
+          <input id="cust-form-name" type="text" placeholder="e.g. Rajesh Sharma" required class="w-full px-3 py-1.5 bg-white border border-zinc-200 rounded-lg focus:ring-1 focus:ring-zinc-950">
+        </div>
+        <div class="grid grid-cols-2 gap-2.5">
+          <div>
+            <label class="block font-medium text-zinc-700 mb-1">Phone Number *</label>
+            <input id="cust-form-phone" type="text" placeholder="+91 98..." required class="w-full px-3 py-1.5 bg-white border border-zinc-200 rounded-lg focus:ring-1 focus:ring-zinc-950 font-mono">
+          </div>
+          <div>
+            <label class="block font-medium text-zinc-700 mb-1">Email</label>
+            <input id="cust-form-email" type="email" placeholder="patient@gmail.com" class="w-full px-3 py-1.5 bg-white border border-zinc-200 rounded-lg focus:ring-1 focus:ring-zinc-950">
+          </div>
+        </div>
+        <div>
+          <label class="block font-medium text-zinc-700 mb-1">Address</label>
+          <input id="cust-form-address" type="text" placeholder="City, Locality" class="w-full px-3 py-1.5 bg-white border border-zinc-200 rounded-lg focus:ring-1 focus:ring-zinc-950">
+        </div>
+        <div>
+          <label class="block font-medium text-red-600 mb-1">Drug Allergies & Medical Warnings (Crucial)</label>
+          <textarea id="cust-form-notes" rows="2" placeholder="e.g. Allergic to Penicillin, Diabetic, Hypertension..." class="w-full px-3 py-1.5 bg-amber-50/60 border border-amber-200 rounded-lg text-amber-900 focus:ring-1 focus:ring-amber-500"></textarea>
+        </div>
+        <div class="pt-3 border-t border-zinc-200 flex justify-end gap-2">
+          <button type="button" onclick="customers.closeModal()" class="px-3 py-1.5 border border-zinc-200 text-zinc-700 font-medium rounded-lg hover:bg-zinc-50 shadow-xs">Cancel</button>
+          <button type="submit" class="px-4 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-50 font-medium rounded-lg shadow-xs">Save Patient</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+
+
+  <!-- 7. Customer Profile Details Modal -->
+  <div id="customer-profile-modal" class="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-xl max-w-md w-full shadow-2xl overflow-hidden border border-zinc-200 flex flex-col max-h-[85vh]">
+      <div class="p-4 border-b border-zinc-200 flex items-center justify-between bg-zinc-50/75">
+        <div>
+          <h3 id="cust-profile-name" class="font-semibold text-zinc-900 text-sm">Patient Record</h3>
+          <p id="cust-profile-phone" class="text-xs font-mono text-zinc-500">--</p>
+        </div>
+        <button onclick="customers.closeProfileModal()" class="text-zinc-400 hover:text-zinc-700 p-1">✕</button>
+      </div>
+      <div class="p-5 overflow-y-auto space-y-3.5 text-xs">
+        <div class="p-3 bg-amber-50/80 border border-amber-200 rounded-lg">
+          <div class="font-semibold text-amber-800 text-[10px] uppercase tracking-wider mb-0.5">Allergies / Medical Alerts:</div>
+          <p id="cust-profile-notes" class="text-amber-950 font-medium">None noted</p>
+        </div>
+        <div class="grid grid-cols-2 gap-2 text-center">
+          <div class="p-2.5 bg-zinc-50 rounded-lg border border-zinc-100">
+            <span class="text-zinc-400 text-[11px]">Orders:</span>
+            <div id="cust-profile-total-orders" class="font-bold text-zinc-900 text-sm tabular-nums mt-0.5">0</div>
+          </div>
+          <div class="p-2.5 bg-zinc-50 rounded-lg border border-zinc-100">
+            <span class="text-zinc-400 text-[11px]">Total Spent:</span>
+            <div id="cust-profile-total-spent" class="font-bold text-zinc-900 text-sm tabular-nums mt-0.5">₹0.00</div>
+          </div>
+        </div>
+        <div>
+          <h4 class="font-semibold text-zinc-700 mb-1.5 uppercase text-[10px] tracking-wider">Past Prescriptions & Invoices</h4>
+          <div id="cust-profile-sales" class="space-y-1 max-h-[160px] overflow-y-auto border border-zinc-100 rounded-lg p-2 bg-zinc-50/40"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+
+  <!-- 8. Prescription Upload Dialog -->
+  <div id="prescription-modal" class="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-xl max-w-md w-full shadow-2xl overflow-hidden border border-zinc-200 flex flex-col">
+      <div class="p-4 border-b border-zinc-200 flex items-center justify-between bg-zinc-50/75">
+        <h3 class="font-semibold text-zinc-900 text-sm">Upload Prescription (Rx)</h3>
+        <button onclick="prescriptions.closeModal()" class="text-zinc-400 hover:text-zinc-700 p-1">✕</button>
+      </div>
+      <form id="rx-form" onsubmit="prescriptions.savePrescription(event)" class="p-5 space-y-3 text-xs">
+        <div>
+          <label class="block font-medium text-zinc-700 mb-1">Patient / Customer *</label>
+          <select id="rx-form-customer" required class="w-full px-2.5 py-1.5 bg-white border border-zinc-200 rounded-lg focus:ring-1 focus:ring-zinc-950 font-medium"></select>
+        </div>
+        <div class="grid grid-cols-2 gap-2.5">
+          <div>
+            <label class="block font-medium text-zinc-700 mb-1">Doctor Name *</label>
+            <input id="rx-form-doctor" type="text" placeholder="Dr. Rajesh Kumar" required class="w-full px-3 py-1.5 bg-white border border-zinc-200 rounded-lg focus:ring-1 focus:ring-zinc-950">
+          </div>
+          <div>
+            <label class="block font-medium text-zinc-700 mb-1">License #</label>
+            <input id="rx-form-license" type="text" placeholder="MCI-DEL-4821" class="w-full px-3 py-1.5 bg-white border border-zinc-200 rounded-lg focus:ring-1 focus:ring-zinc-950 font-mono">
+          </div>
+        </div>
+        <div>
+          <label class="block font-medium text-zinc-700 mb-1">Prescription Date</label>
+          <input id="rx-form-date" type="date" class="w-full px-3 py-1.5 bg-white border border-zinc-200 rounded-lg focus:ring-1 focus:ring-zinc-950 font-medium">
+        </div>
+        <div>
+          <label class="block font-medium text-zinc-700 mb-1">Prescription Notes / Dosage Instructions</label>
+          <textarea id="rx-form-notes" rows="2" placeholder="e.g. Dolo 650mg SOS, Montair-LC OD at night..." class="w-full px-3 py-1.5 bg-white border border-zinc-200 rounded-lg focus:ring-1 focus:ring-zinc-950"></textarea>
+        </div>
+        <div>
+          <label class="block font-medium text-zinc-700 mb-1">Upload Rx Document / Photo (Optional)</label>
+          <input id="rx-form-file" type="file" accept="image/*,.pdf" class="w-full text-xs text-zinc-500 file:mr-2.5 file:py-1 file:px-2.5 file:rounded-md file:border file:border-zinc-200 file:text-xs file:font-medium file:bg-zinc-50 file:text-zinc-700 hover:file:bg-zinc-100">
+        </div>
+        <div class="pt-3 border-t border-zinc-200 flex justify-end gap-2">
+          <button type="button" onclick="prescriptions.closeModal()" class="px-3 py-1.5 border border-zinc-200 text-zinc-700 font-medium rounded-lg hover:bg-zinc-50 shadow-xs">Cancel</button>
+          <button type="submit" class="px-4 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-50 font-medium rounded-lg shadow-xs">Save Prescription</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- 9. Change Password & Security Modal -->
+  <div id="change-password-modal" class="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-xl max-w-sm w-full shadow-2xl overflow-hidden border border-zinc-200 flex flex-col">
+      <div class="p-4 border-b border-zinc-200 flex items-center justify-between bg-zinc-50/75">
+        <div class="flex items-center gap-2">
+          <div class="w-6 h-6 rounded bg-zinc-900 text-white flex items-center justify-center text-xs">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
+          </div>
+          <h3 class="font-semibold text-zinc-900 text-sm">Security & Password</h3>
+        </div>
+        <button onclick="auth.hideChangePasswordModal()" class="text-zinc-400 hover:text-zinc-700 text-sm font-semibold">✕</button>
+      </div>
+
+      <form id="change-password-form" onsubmit="event.preventDefault(); const cur = document.getElementById('pw-current').value; const nw = document.getElementById('pw-new').value; const cf = document.getElementById('pw-confirm').value; if(nw !== cf){ showToast('New passwords do not match!', 'error'); return; } auth.changePassword(cur, nw);" class="p-5 space-y-3.5 text-xs">
+        <div>
+          <label class="block font-medium text-zinc-700 mb-1">Current Password *</label>
+          <input id="pw-current" type="password" required placeholder="Enter current password" class="w-full px-3 py-1.5 bg-white border border-zinc-200 rounded-lg focus:ring-1 focus:ring-zinc-950">
+        </div>
+        <div>
+          <label class="block font-medium text-zinc-700 mb-1">New Password * (Min 6 characters)</label>
+          <input id="pw-new" type="password" required minlength="6" placeholder="Enter new password" class="w-full px-3 py-1.5 bg-white border border-zinc-200 rounded-lg focus:ring-1 focus:ring-zinc-950">
+        </div>
+        <div>
+          <label class="block font-medium text-zinc-700 mb-1">Confirm New Password *</label>
+          <input id="pw-confirm" type="password" required minlength="6" placeholder="Re-type new password" class="w-full px-3 py-1.5 bg-white border border-zinc-200 rounded-lg focus:ring-1 focus:ring-zinc-950">
+        </div>
+
+        <div class="pt-3 border-t border-zinc-200 flex justify-end gap-2">
+          <button type="button" onclick="auth.hideChangePasswordModal()" class="px-3 py-1.5 border border-zinc-200 text-zinc-700 font-medium rounded-lg hover:bg-zinc-50 shadow-xs">Cancel</button>
+          <button type="submit" class="px-4 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-50 font-medium rounded-lg shadow-xs">Update Password</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- 10. Database, Auth & Deployment Diagnostics Modal -->
+  <div id="system-status-modal" class="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-xl max-w-lg w-full shadow-2xl overflow-hidden border border-zinc-200 flex flex-col">
+      <div class="p-4 border-b border-zinc-200 flex items-center justify-between bg-zinc-50/75">
+        <div class="flex items-center gap-2">
+          <div class="w-6 h-6 rounded bg-emerald-600 text-white flex items-center justify-center text-xs">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"/></svg>
+          </div>
+          <div>
+            <h3 class="font-semibold text-zinc-900 text-sm">System & Database Diagnostics</h3>
+            <p class="text-[11px] text-zinc-500">Live backend telemetry & cloud deployment readiness</p>
+          </div>
+        </div>
+        <button onclick="auth.hideSystemModal()" class="text-zinc-400 hover:text-zinc-700 text-sm font-semibold">✕</button>
+      </div>
+
+      <div class="p-5 space-y-4 text-xs overflow-y-auto max-h-[75vh]">
+        
+        <!-- Live Connection Health Card -->
+        <div class="p-3.5 bg-zinc-50 rounded-lg border border-zinc-200 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="font-semibold text-zinc-900 flex items-center gap-1.5">
+              <svg class="w-4 h-4 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+              Database Engine
+            </span>
+            <span id="sys-db-connected" class="text-xs">Checking...</span>
+          </div>
+          <div class="grid grid-cols-2 gap-2 pt-1 border-t border-zinc-200/60 text-[11px]">
+            <div>
+              <span class="text-zinc-500 block">Active Provider</span>
+              <span id="sys-db-provider" class="font-semibold text-zinc-800">SQLite (Local)</span>
+            </div>
+            <div>
+              <span class="text-zinc-500 block">Dialect / Driver</span>
+              <span id="sys-db-driver" class="font-mono text-zinc-700">SQLite 3</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Auth & Security Diagnostics -->
+        <div class="p-3.5 bg-white rounded-lg border border-zinc-200 space-y-2">
+          <span class="font-semibold text-zinc-900 block">Authentication & Session Security</span>
+          <div class="grid grid-cols-2 gap-2 text-[11px]">
+            <div>
+              <span class="text-zinc-500 block">Auth Token Standard</span>
+              <span id="sys-auth-algo" class="font-mono text-zinc-800">HS256 (24h validity)</span>
+            </div>
+            <div>
+              <span class="text-zinc-500 block">Environment Mode</span>
+              <span id="sys-env-badge" class="font-semibold text-zinc-800 uppercase">DEVELOPMENT</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Live Database Records Count -->
+        <div class="grid grid-cols-3 gap-2">
+          <div class="p-3 bg-zinc-50 border border-zinc-200 rounded-lg text-center">
+            <span class="text-[10px] uppercase font-medium text-zinc-500 block">Users</span>
+            <span id="sys-users-count" class="text-base font-semibold text-zinc-900 tabular-nums">-</span>
+          </div>
+          <div class="p-3 bg-zinc-50 border border-zinc-200 rounded-lg text-center">
+            <span class="text-[10px] uppercase font-medium text-zinc-500 block">Medicines</span>
+            <span id="sys-medicines-count" class="text-base font-semibold text-zinc-900 tabular-nums">-</span>
+          </div>
+          <div class="p-3 bg-zinc-50 border border-zinc-200 rounded-lg text-center">
+            <span class="text-[10px] uppercase font-medium text-zinc-500 block">Sales Invoices</span>
+            <span id="sys-sales-count" class="text-base font-semibold text-zinc-900 tabular-nums">-</span>
+          </div>
+        </div>
+
+        <!-- Deployment Readiness Checklist -->
+        <div class="p-3.5 bg-zinc-50/70 rounded-lg border border-zinc-200 space-y-2">
+          <span class="font-semibold text-zinc-900 block text-[11px] uppercase tracking-wider">Cloud Deployment Checklist</span>
+          <ul class="space-y-1.5 text-[11px] text-zinc-600">
+            <li class="flex items-center gap-1.5"><span class="text-emerald-600 font-bold">✓</span> Supabase / PostgreSQL cloud DB supported via <code class="bg-white px-1 py-0.5 rounded border border-zinc-200 font-mono text-[10px]">DATABASE_URL</code></li>
+            <li class="flex items-center gap-1.5"><span class="text-emerald-600 font-bold">✓</span> Production Dockerfile & docker-compose created</li>
+            <li class="flex items-center gap-1.5"><span class="text-emerald-600 font-bold">✓</span> Render (<code class="bg-white px-1 py-0.5 rounded border border-zinc-200 font-mono text-[10px]">render.yaml</code>) & Railway (<code class="bg-white px-1 py-0.5 rounded border border-zinc-200 font-mono text-[10px]">railway.toml</code>) 1-click manifests</li>
+            <li class="flex items-center gap-1.5"><span class="text-emerald-600 font-bold">✓</span> Indian Rupee (₹ / INR) tax invoice billing & seed records</li>
+          </ul>
+        </div>
+
+      </div>
+
+      <div class="p-3 bg-zinc-50 border-t border-zinc-200 flex justify-between items-center text-[11px]">
+        <button onclick="auth.refreshSystemStatus()" class="px-2.5 py-1 text-zinc-600 hover:text-zinc-900 border border-zinc-200 rounded bg-white shadow-2xs">↻ Refresh Status</button>
+        <button onclick="auth.hideSystemModal()" class="px-3 py-1 bg-zinc-900 text-white rounded font-medium shadow-xs">Close</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Script Includes -->
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/dashboard.js"></script>
+  <script src="js/pos.js"></script>
+  <script src="js/inventory.js"></script>
+  <script src="js/sales.js"></script>
+  <script src="js/suppliers.js"></script>
+  <script src="js/purchases.js"></script>
+  <script src="js/customers.js"></script>
+  <script src="js/prescriptions.js"></script>
+  <script src="js/alerts.js"></script>
+  <script src="js/reports.js"></script>
+  <script src="js/users.js"></script>
+  <script src="js/app.js"></script>
+
+  <script>
+    function toggleAuthTab(tab) {
+      const loginForm = document.getElementById('login-form');
+      const regForm = document.getElementById('register-form');
+      const tabLogin = document.getElementById('auth-tab-login');
+      const tabReg = document.getElementById('auth-tab-register');
+
+      if (tab === 'login') {
+        loginForm.classList.remove('hidden');
+        regForm.classList.add('hidden');
+        tabLogin.className = 'flex-1 pb-2 font-medium text-xs text-zinc-900 border-b-2 border-zinc-900';
+        tabReg.className = 'flex-1 pb-2 font-medium text-xs text-zinc-400 hover:text-zinc-600';
+      } else {
+        loginForm.classList.add('hidden');
+        regForm.classList.remove('hidden');
+        tabReg.className = 'flex-1 pb-2 font-medium text-xs text-zinc-900 border-b-2 border-zinc-900';
+        tabLogin.className = 'flex-1 pb-2 font-medium text-xs text-zinc-400 hover:text-zinc-600';
+      }
+    }
+  </script>
+
+</body>
+</html>
